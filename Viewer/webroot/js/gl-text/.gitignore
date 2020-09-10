@@ -1,0 +1,8 @@
+demo
+design
+instances
+*node_modules
+*.psd
+docs
+gh-pages
+dist*

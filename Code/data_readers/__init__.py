@@ -12,3 +12,11 @@ class DataReader(ABC):
     @abstractmethod
     def get_data(self):
         raise NotImplementedError
+
+    @abstractmethod
+    def generate_labels(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_labels(self):
+        raise NotImplementedError

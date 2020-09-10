@@ -1,18 +1,17 @@
-
-import numpy
-import os
+import numpy as np
 import functools
 import operator
 import gzip
 import struct
 import array
-import tempfile
+from matplotlib import pyplot as plt
 from data_readers import DataReader
 
 
 class IdxDecodeError(ValueError):
     """Raised when an invalid idx file is parsed."""
     pass
+
 
 # copied from https://github.com/datapythonista/mnist/blob/master/mnist/__init__.py
 def parse_idx(fd):
@@ -21,14 +20,11 @@ def parse_idx(fd):
     ----------
     fd : file
         File descriptor of the IDX file to parse
-    endian : str
-        Byte order of the IDX file. See [1] for available options
     Returns
     -------
     data : numpy.ndarray
         Numpy array with the dimensions and the data in the IDX file
-    1. https://docs.python.org/3/library/struct.html
-        #byte-order-size-and-alignment
+    1. https://docs.python.org/3/library/struct.html#byte-order-size-and-alignment
     """
     DATA_TYPES = {0x08: 'B',  # unsigned byte
                   0x09: 'b',  # signed byte
@@ -66,29 +62,82 @@ def parse_idx(fd):
         raise IdxDecodeError('IDX file has wrong number of items. '
                              f'Expected: {expected_items}. Found: {len(data)}')
 
-    return numpy.array(data).reshape(dimension_sizes)
+    return np.array(data).reshape(dimension_sizes)
+
+
+# TRAINING SET LABEL FILE (train-labels-idx1-ubyte):
+# [offset] [type]          [value]          [description]
+# 0000     32 bit integer  0x00000801(2049) magic number (MSB first)
+# 0004     32 bit integer  60000            number of items
+# 0008     unsigned byte   ??               label
+# 0009     unsigned byte   ??               label
+# ........
+# xxxx     unsigned byte   ??               label
+# The labels values are 0 to 9.
+#
+# TRAINING SET IMAGE FILE (train-images-idx3-ubyte):
+# [offset] [type]          [value]          [description]
+# 0000     32 bit integer  0x00000803(2051) magic number
+# 0004     32 bit integer  60000            number of images
+# 0008     32 bit integer  28               number of rows
+# 0012     32 bit integer  28               number of columns
+# 0016     unsigned byte   ??               pixel
+# 0017     unsigned byte   ??               pixel
+# ........
+# xxxx     unsigned byte   ??               pixel
+# Pixels are organized row-wise. Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
+#
+# TEST SET LABEL FILE (t10k-labels-idx1-ubyte):
+# [offset] [type]          [value]          [description]
+# 0000     32 bit integer  0x00000801(2049) magic number (MSB first)
+# 0004     32 bit integer  10000            number of items
+# 0008     unsigned byte   ??               label
+# 0009     unsigned byte   ??               label
+# ........
+# xxxx     unsigned byte   ??               label
+# The labels values are 0 to 9.
+#
+# TEST SET IMAGE FILE (t10k-images-idx3-ubyte):
+# [offset] [type]          [value]          [description]
+# 0000     32 bit integer  0x00000803(2051) magic number
+# 0004     32 bit integer  10000            number of images
+# 0008     32 bit integer  28               number of rows
+# 0012     32 bit integer  28               number of columns
+# 0016     unsigned byte   ??               pixel
+# 0017     unsigned byte   ??               pixel
+# ........
+# xxxx     unsigned byte   ??               pixel
+# Pixels are organized row-wise. Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
 
 class MNIST(DataReader):
-    _FILES = {
-        'train_images': 'train-images-idx3-ubyte.gz',
-        'train_labels': 'train-labels-idx1-ubyte.gz',
-        'test_images': 't10k-images-idx3-ubyte.gz',
-        'test_labels': 't10k-labels-idx1-ubyte.gz'
-    }
-
     def __init__(self, raw_data_dir):
         super().__init__(raw_data_dir)
-        self.train_images = None
-        self.train_labels = None
-        self.test_images = None
-        self.test_labels = None
+        with gzip.open(f'{self.raw_data_dir}/train-images-idx3-ubyte.gz', 'rb') as f:
+            train_images = parse_idx(f)
+        with gzip.open(f'{self.raw_data_dir}/train-labels-idx1-ubyte.gz', 'rb') as f:
+            train_labels = parse_idx(f)
+        with gzip.open(f'{self.raw_data_dir}/t10k-images-idx3-ubyte.gz', 'rb') as f:
+            test_images = parse_idx(f)
+        with gzip.open(f'{self.raw_data_dir}/t10k-labels-idx1-ubyte.gz', 'rb') as f:
+            test_labels = parse_idx(f)
 
-    def _load_data(self):
-        for
-        with gzip.open(self.raw_data_dir)
+        self.images = np.vstack((train_images, test_images))
+        self.labels = np.hstack((train_labels, test_labels))
 
     def generate_data(self):
-        pass
+        for i in self.get_data():
+            yield i
 
     def get_data(self):
-        pass
+        return self.images
+
+    def get_labels(self):
+        return self.labels
+
+    def generate_labels(self):
+        for l in self.get_labels():
+            yield l
+
+    def show(self, sample):
+        plt.imshow(sample, cmap='gray')
+        plt.show()
