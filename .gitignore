@@ -21,3 +21,8 @@
 /Logs/
 /FIt-SNE/bin/
 /TempData/
+/umap/.idea/
+/umap/examples/
+/umap/doc/
+/umap/ci_scripts/
+/umap/.idea/
