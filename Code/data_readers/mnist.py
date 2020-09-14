@@ -122,7 +122,14 @@ class MNIST(DataReader):
             test_labels = parse_idx(f)
 
         self.images = np.vstack((train_images, test_images))
-        self.labels = np.hstack((train_labels, test_labels))
+        self.labels = np.hstack((train_labels, test_labels)).astype(int)
+
+    def __len__(self):
+        return len(self.get_data())
+
+    @property
+    def data_labels(self):
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def generate_data(self):
         for i in self.get_data():

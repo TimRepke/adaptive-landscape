@@ -6,6 +6,17 @@ from matplotlib import pyplot as plt
 from data_readers import DataReader
 
 
+# 0	T-shirt/top
+# 1	Trouser
+# 2	Pullover
+# 3	Dress
+# 4	Coat
+# 5	Sandal
+# 6	Shirt
+# 7	Sneaker
+# 8	Bag
+# 9	Ankle boot
+
 class FashionMNIST(DataReader):
     def __init__(self, raw_data_dir):
         super().__init__(raw_data_dir)
@@ -19,7 +30,14 @@ class FashionMNIST(DataReader):
             test_images = np.frombuffer(f.read(), dtype=np.uint8, offset=16).reshape(len(test_labels), 784)
 
         self.images = np.reshape(np.vstack((train_images, test_images)), (-1, 28, 28))
-        self.labels = np.hstack((train_labels, test_labels))
+        self.labels = np.hstack((train_labels, test_labels)).astype(int)
+
+    def __len__(self):
+        return len(self.get_data())
+
+    @property
+    def data_labels(self):
+        return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
     def generate_data(self):
         for i in self.get_data():
