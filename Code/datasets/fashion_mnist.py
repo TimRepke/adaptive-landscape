@@ -3,7 +3,7 @@ import gzip
 import numpy as np
 from matplotlib import pyplot as plt
 
-from data_readers import DataReader
+from datasets import DataSet
 
 
 # 0	T-shirt/top
@@ -17,7 +17,7 @@ from data_readers import DataReader
 # 8	Bag
 # 9	Ankle boot
 
-class FashionMNIST(DataReader):
+class FashionMNIST(DataSet):
     def __init__(self, raw_data_dir):
         super().__init__(raw_data_dir)
         with gzip.open(f'{self.raw_data_dir}/train-labels-idx1-ubyte.gz', 'rb') as f:

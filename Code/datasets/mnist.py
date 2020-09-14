@@ -5,7 +5,7 @@ import gzip
 import struct
 import array
 from matplotlib import pyplot as plt
-from data_readers import DataReader
+from datasets import DataSet
 
 
 class IdxDecodeError(ValueError):
@@ -109,8 +109,8 @@ def parse_idx(fd):
 # xxxx     unsigned byte   ??               pixel
 # Pixels are organized row-wise. Pixel values are 0 to 255. 0 means background (white), 255 means foreground (black).
 
-class MNIST(DataReader):
-    def __init__(self, raw_data_dir):
+class MNIST(DataSet):
+    def __init__(self, raw_data_dir, flatten=True):
         super().__init__(raw_data_dir)
         with gzip.open(f'{self.raw_data_dir}/train-images-idx3-ubyte.gz', 'rb') as f:
             train_images = parse_idx(f)
@@ -122,6 +122,8 @@ class MNIST(DataReader):
             test_labels = parse_idx(f)
 
         self.images = np.vstack((train_images, test_images))
+        if flatten:
+            self.images = self.images.reshape((self.images.shape[0], -1))
         self.labels = np.hstack((train_labels, test_labels)).astype(int)
 
     def __len__(self):

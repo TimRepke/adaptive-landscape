@@ -1,5 +1,5 @@
 import random
-from data_readers import DataReader
+from datasets import DataSet
 from typing import Union, Dict, List, Tuple
 import numpy as np
 import time
@@ -11,7 +11,7 @@ class SamplingReference(enum.Enum):
     ITEM_COUNT = enum.auto()
 
 
-def temporal(dataset: DataReader,
+def temporal(dataset: DataSet,
              intervals: Union[int, List[float]] = None,
              label_dist: List[Dict[int, float]] = None,
              target_size: Union[int, float] = None,
@@ -88,7 +88,7 @@ def temporal(dataset: DataReader,
                 else:
                     abs_factor = len(idxs[label]) * (target_size / num_items) * num_labels
                 interval_label_size_abs = int(round(distribution * interval_size * abs_factor))
-                print(f'calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor}) '
+                print(f'calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor:.3f}) '
                       f'= {interval_label_size_abs} items')
 
             if len(idxs[label]) < current_idxs[label] + interval_label_size_abs:

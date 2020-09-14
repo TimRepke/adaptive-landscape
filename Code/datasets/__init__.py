@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod, abstractproperty
 from typing import Union, List, Iterable, Dict
 
 
-class DataReader(ABC):
+class DataSet(ABC):
     def __init__(self, raw_data_dir):
         self.raw_data_dir = raw_data_dir
 
