@@ -4,6 +4,9 @@ from typing import Union, Dict, List, Tuple
 import numpy as np
 import time
 import enum
+import logging
+
+logger = logging.getLogger('generators')
 
 
 class SamplingReference(enum.Enum):
@@ -60,11 +63,11 @@ def temporal(dataset: DataSet,
     for iidxs in idxs:
         random.shuffle(iidxs)
 
-    print(f'Sampling data with\n'
-          f'  - intervals: [{", ".join(f"{i:.3f}" for i in intervals)}]\n'
-          f'  - target size: {target_size}\n'
-          f'  - actual labels: {" | ".join(f"label {i} ({len(iidxs)})" for i, iidxs in enumerate(idxs))}\n'
-          f'  - requested label distribution: {label_dist}')
+    logger.info(f'Sampling data with\n'
+                f'  - intervals: [{", ".join(f"{i:.3f}" for i in intervals)}]\n'
+                f'  - target size: {target_size}\n'
+                f'  - actual labels: {" | ".join(f"label {i} ({len(iidxs)})" for i, iidxs in enumerate(idxs))}\n'
+                f'  - requested label distribution: {label_dist}')
 
     current_idxs = [0] * num_labels
 
@@ -78,27 +81,27 @@ def temporal(dataset: DataSet,
             label_distribution = {label: default_dist if label not in label_distribution else label_distribution[label]
                                   for label in dataset.data_labels}
         for label, distribution in label_distribution.items():
-            print(f'interval {interval_num + 1}, label {label} (current idx: {current_idxs[label]}):', end=' ')
+            logger.debug(f'Interval {interval_num + 1}, label {label} (current idx: {current_idxs[label]}):')
             if type(distribution) is int:
                 interval_label_size_abs = distribution
-                print(f'fixed abs = {distribution} items')
+                logger.debug(f'fixed abs = {distribution} items')
             else:
                 if sampling_reference is SamplingReference.ITEM_COUNT:
                     abs_factor = target_size
                 else:
                     abs_factor = len(idxs[label]) * (target_size / num_items) * num_labels
                 interval_label_size_abs = int(round(distribution * interval_size * abs_factor))
-                print(f'calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor:.3f}) '
-                      f'= {interval_label_size_abs} items')
+                logger.debug(f'calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor:.3f}) '
+                             f'= {interval_label_size_abs} items')
 
             if len(idxs[label]) < current_idxs[label] + interval_label_size_abs:
-                print(f' > WARN: not enough data for label {label} at interval {interval_num}'
-                      f' (diff: {len(idxs[label]) - current_idxs[label] - interval_label_size_abs})')
+                logger.warning(f'not enough data for label {label} at interval {interval_num}'
+                               f' (diff: {len(idxs[label]) - current_idxs[label] - interval_label_size_abs})')
             labels_interval += [label] * interval_label_size_abs
             data_interval += [dataset.get_data()[idx] for idx in
                               idxs[label][current_idxs[label]:current_idxs[label] + interval_label_size_abs]]
             current_idxs[label] += interval_label_size_abs
-        print(f'== Interval {interval_num + 1} has {len(data_interval)} items in total.')
+        logger.info(f'Interval {interval_num + 1} has {len(data_interval)} items in total.')
         data.append(data_interval)
         labels.append(labels_interval)
     return data, labels

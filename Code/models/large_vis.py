@@ -29,22 +29,37 @@
 #
 # LargeVis.save(args.output)
 import LargeVis
+import numpy as np
 from models import Model
 
 
 class LargeVisModel(Model):
     @staticmethod
-    def fit_interval(data=None, input_file=None, threads=-1, n_propagations=-1, alpha=-1, gamma=-1, perplexity=-1,
+    def write_temp_file(file_name, data):
+        with open(file_name, 'w') as f:
+            f.write(f'{len(data)}\t{len(data[0])}\n')
+            [f.write('\t'.join([f'{di:.5f}' for di in d]) + '\n') for d in data]
+
+    @staticmethod
+    def fit_interval(data=None, input_file=None, n_threads=-1, n_propagations=-1, alpha=-1, gamma=-1, perplexity=-1,
                      n_trees=-1, n_negatives=-1, n_neighbours=-1):
         if data is not None:
-            LargeVis.loaddata(data)
+            data = np.array(data, dtype=np.float)
+            LargeVis.loadarray(np.array(data))
         elif input_file is not None:
-            pass
+            LargeVis.loadfile(input_file)
         else:
             raise AssertionError('Needs either data or input_file parameter!')
 
-        Y = LargeVis.run(output_dimension=2, threads_number=threads, training_samples=-1,
-                         propagations_number=n_propagations, learning_rate=alpha, rp_trees_number=n_trees,
-                         negative_samples_number=n_negatives, neighbors_number=n_neighbours,
-                         gamma=gamma, perplexity=perplexity)
+        Y = LargeVis.run(2,  # output_dimension
+                         n_threads,  # threads_number
+                         -1,  # training_samples
+                         n_propagations,  # propagations_number
+                         alpha,  # learning_rate
+                         n_trees,  # rp_trees_number
+                         n_negatives,  # negative_samples_number
+                         n_neighbours,  # neighbors_number
+                         gamma,  # gamma
+                         perplexity  # perplexity
+                         )
         return Y
