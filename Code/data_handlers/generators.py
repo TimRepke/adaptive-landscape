@@ -84,14 +84,14 @@ def temporal(dataset: DataSet,
             logger.debug(f'Interval {interval_num + 1}, label {label} (current idx: {current_idxs[label]}):')
             if type(distribution) is int:
                 interval_label_size_abs = distribution
-                logger.debug(f'fixed abs = {distribution} items')
+                logger.debug(f' > fixed abs = {distribution} items')
             else:
                 if sampling_reference is SamplingReference.ITEM_COUNT:
                     abs_factor = target_size
                 else:
                     abs_factor = len(idxs[label]) * (target_size / num_items) * num_labels
                 interval_label_size_abs = int(round(distribution * interval_size * abs_factor))
-                logger.debug(f'calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor:.3f}) '
+                logger.debug(f' > calculated abs({distribution:.3f}*{interval_size:.3f}*{abs_factor:.3f}) '
                              f'= {interval_label_size_abs} items')
 
             if len(idxs[label]) < current_idxs[label] + interval_label_size_abs:

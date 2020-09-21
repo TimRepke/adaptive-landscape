@@ -12,7 +12,8 @@
 /Viewer/webroot/js/regl-scatterplot/example/
 /Viewer/webroot/js/regl-scatterplot/docs/
 /Viewer/webroot/js/regl-scatterplot/data/
-/Code/externals/FIt-SNE/bin/
+/Code/externals/FItSNE/bin/
+/Code/externals/FItSNE/src/winlibs/
 /Code/externals/umap/.idea/
 /Code/externals/umap/examples/
 /Code/externals/umap/doc/

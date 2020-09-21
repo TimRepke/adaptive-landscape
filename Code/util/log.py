@@ -41,6 +41,9 @@ def init_logging(level):
         'loggers': {
             'urllib3.connectionpool': {
                 'level': 'ERROR'
+            },
+            'matplotlib.font_manager': {
+                'level': 'ERROR'
             }
         },
         'root': {

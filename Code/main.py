@@ -5,15 +5,13 @@ import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
 from data_handlers.disk import store_result
 from models.large_vis import LargeVisModel
+from models.fitsne import FItSNEModel
 from evaluation.displacement import calculate_displacement_score
+from data_handlers.plot import plot_grid
 import os
 from glob import glob
 import logging
 from util.log import init_logging
-
-# parser.add_argument('--log', type=str, default='DEBUG',
-#                     choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'],
-#                     help='Log Level')
 
 init_logging(['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'][4])
 logger = logging.getLogger('main')
@@ -21,41 +19,87 @@ logger = logging.getLogger('main')
 TEMP_FOLDER = '../TempData'
 OUTPUT_FOLDER = '../OutputData'
 
-logger.info('> Loading MNIST dataset...')
-m = MNIST('../RawData/MNIST')
+logger.info('> Loading MNIST datasets...')
+DATASETS = [
+    ('mnist', MNIST('../RawData/MNIST')),
+    # ('fashion_mnist', FashionMNIST('../RawData/FashionMNIST'))
+]
 
-# fm = FashionMNIST('../RawData/FashionMNIST')
+LABEL_DIST = [{3: 0.005}, {3: 0.01}, {3: 0.1}]
+SAMPLING_REF = SamplingReference.LABEL_COUNT
+TARGET_SIZE = 10000
 
-_rerun = False
+RUN_MODELS = not True
 
-if _rerun:
-    logger.info('> Preparing fake dynamic data...')
-    temporal_data, temporal_labels = temporal(m,
-                                              label_dist=[{3: 0.005}, {3: 0.01}, {3: 0.1}],
-                                              target_size=10000,
-                                              sampling_reference=SamplingReference.LABEL_COUNT)
+MODEL_CONFIGS = [
+    (FItSNEModel, {}),
+    # (LargeVisModel, {}),
+]
 
-    for interval, (interval_data, interval_labels) in enumerate(
-            accumulate(temporal_data, temporal_labels, generate=True)):
-        logger.info(f'> Running LargeVis for interval {interval} with {len(interval_data)} data points.')
+PLOT = True
+RUN_EVAL = True
 
-        logger.info(' - Preparing temp data file...')
-        temp_file = f'{TEMP_FOLDER}/lv_temp'
-        LargeVisModel.write_temp_file(temp_file, interval_data)
+if RUN_MODELS:
+    for dataset_name, dataset in DATASETS:
+        logger.info(f'> Preparing fake dynamic data for {dataset_name}...')
+        temporal_data, temporal_labels = temporal(dataset,
+                                                  label_dist=LABEL_DIST,
+                                                  target_size=TARGET_SIZE,
+                                                  sampling_reference=SAMPLING_REF)
 
-        logger.info(' - Run LargeVis...')
-        y = LargeVisModel.fit_interval(input_file=temp_file)
+        for interval, (interval_data, interval_labels) in enumerate(
+                accumulate(temporal_data, temporal_labels, generate=True)):
+            for model, config in MODEL_CONFIGS:
+                logger.info(
+                    f'> Running {model.__name__} for interval {interval} with {len(interval_data)} data points.')
 
-        logger.info(' - Storing results...')
-        store_result(y, interval_labels, 'mnist', 'largevis', interval, OUTPUT_FOLDER)
+                temp_file = None
+                data = None
+                if model is LargeVisModel:
+                    logger.info(' - Preparing temp data file...')
+                    temp_file = f'{TEMP_FOLDER}/lv_temp'
+                    LargeVisModel.write_temp_file(temp_file, interval_data)
+                else:
+                    data = interval_data
 
-        logger.info(' - Removing temp data file...')
-        os.remove(temp_file)
+                logger.info(f' - Run {model.__name__}...')
+                logger.info(f'   Settings: {config}')
+                y = model.fit_interval(data=data, input_file=temp_file, **config)
 
-_rerun = True
-if _rerun:
-    eval_files = glob(f'{OUTPUT_FOLDER}/mnist_largevis_*.tsv')
-    calculate_displacement_score(eval_files)
+                logger.info(' - Storing results...')
+                store_result(y, interval_labels, dataset_name, model.__name__, interval, OUTPUT_FOLDER)
+
+                if model is LargeVisModel and temp_file is not None:
+                    logger.info(' - Removing temp data file...')
+                    os.remove(temp_file)
+
+if PLOT:
+    for dataset_name, _ in DATASETS:
+        for model, _ in MODEL_CONFIGS:
+            eval_files = sorted(glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}*.tsv'))
+            results = []
+            labels = []
+            for file in eval_files:
+                logger.debug(f'Reading {file}...')
+                with open(file, 'r') as f:
+                    tmp = [
+                        [float(li) for li in line.strip().split()]
+                        for line in f
+                    ]
+                    labels.append(np.array([int(ti[-1]) for ti in tmp]))
+                    results.append(np.array([[ti[0], ti[1]] for ti in tmp]))
+
+            logger.info(f'Plotting results to {OUTPUT_FOLDER}/{dataset_name}_{model.__name__}.pdf')
+
+            plot_grid(target_file=f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}.pdf',
+                      data=results, labels=labels, desc=eval_files, rows=1, cols=3, figsize=(5, 2), point_size=0.1)
+
+if RUN_EVAL:
+    for dataset_name, _ in DATASETS:
+        for model, _ in MODEL_CONFIGS:
+            logger.info(f'Running evaluations for {dataset_name} and {model}...')
+            eval_files = glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}*.tsv')
+            calculate_displacement_score(eval_files)
 
 # digits = [i[0].reshape((-1,)) for i in m.get_data()][:1000]
 # labels = np.array([i[1] for i in m.get_data()][:1000])
