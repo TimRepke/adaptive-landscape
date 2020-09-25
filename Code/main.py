@@ -6,6 +6,8 @@ from data_handlers.generators import temporal, SamplingReference, accumulate
 from data_handlers.disk import store_result
 from models.large_vis import LargeVisModel
 from models.fitsne import FItSNEModel
+from models.bhtsne import BHtSNEModel
+from models.umap import UMAPModel
 from evaluation.displacement import calculate_displacement_score
 from data_handlers.plot import plot_grid
 import os
@@ -25,18 +27,23 @@ DATASETS = [
     # ('fashion_mnist', FashionMNIST('../RawData/FashionMNIST'))
 ]
 
-LABEL_DIST = [{3: 0.005}, {3: 0.01}, {3: 0.1}]
+LABEL_DIST = [{3: 0.001}, {3: 0.01}, {3: 0.1}]
+# LABEL_DIST = [{3: 0.001}, {3: 0.005}, {3: 0.01}, {3: 0.05}, {3: 0.1}]
 SAMPLING_REF = SamplingReference.LABEL_COUNT
-TARGET_SIZE = 10000
+TARGET_SIZE = 20000
 
-RUN_MODELS = not True
 
 MODEL_CONFIGS = [
-    (FItSNEModel, {}),
-    # (LargeVisModel, {}),
+    (FItSNEModel, {'seed': 2020, 'df': 0.5}),
+    (FItSNEModel, {'seed': 2020, 'df': 1.0}),
+    (FItSNEModel, {'seed': 2020, 'df': 100.0}),
+    (BHtSNEModel, {'randseed': 2020}),
+    (UMAPModel, {}),
+    (LargeVisModel, {}),
 ]
 
-PLOT = True
+RUN_MODELS = not True
+PLOT = not True
 RUN_EVAL = True
 
 if RUN_MODELS:
@@ -49,7 +56,7 @@ if RUN_MODELS:
 
         for interval, (interval_data, interval_labels) in enumerate(
                 accumulate(temporal_data, temporal_labels, generate=True)):
-            for model, config in MODEL_CONFIGS:
+            for mi, (model, config) in enumerate(MODEL_CONFIGS):
                 logger.info(
                     f'> Running {model.__name__} for interval {interval} with {len(interval_data)} data points.')
 
@@ -67,7 +74,7 @@ if RUN_MODELS:
                 y = model.fit_interval(data=data, input_file=temp_file, **config)
 
                 logger.info(' - Storing results...')
-                store_result(y, interval_labels, dataset_name, model.__name__, interval, OUTPUT_FOLDER)
+                store_result(y, interval_labels, dataset_name, model.__name__ + str(mi), interval, OUTPUT_FOLDER)
 
                 if model is LargeVisModel and temp_file is not None:
                     logger.info(' - Removing temp data file...')
@@ -75,8 +82,8 @@ if RUN_MODELS:
 
 if PLOT:
     for dataset_name, _ in DATASETS:
-        for model, _ in MODEL_CONFIGS:
-            eval_files = sorted(glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}*.tsv'))
+        for mi, (model, _) in enumerate(MODEL_CONFIGS):
+            eval_files = sorted(glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}*.tsv'))
             results = []
             labels = []
             for file in eval_files:
@@ -89,16 +96,16 @@ if PLOT:
                     labels.append(np.array([int(ti[-1]) for ti in tmp]))
                     results.append(np.array([[ti[0], ti[1]] for ti in tmp]))
 
-            logger.info(f'Plotting results to {OUTPUT_FOLDER}/{dataset_name}_{model.__name__}.pdf')
+            logger.info(f'Plotting results to {OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}.pdf')
 
-            plot_grid(target_file=f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}.pdf',
+            plot_grid(target_file=f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}.pdf',
                       data=results, labels=labels, desc=eval_files, rows=1, cols=3, figsize=(5, 2), point_size=0.1)
 
 if RUN_EVAL:
     for dataset_name, _ in DATASETS:
-        for model, _ in MODEL_CONFIGS:
-            logger.info(f'Running evaluations for {dataset_name} and {model}...')
-            eval_files = glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}*.tsv')
+        for mi, (model, _) in enumerate(MODEL_CONFIGS):
+            logger.info(f'Running evaluations for {dataset_name} and {model} ({mi})...')
+            eval_files = glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}*.tsv')
             calculate_displacement_score(eval_files)
 
 # digits = [i[0].reshape((-1,)) for i in m.get_data()][:1000]

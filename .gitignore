@@ -26,4 +26,11 @@
 /Code/externals/LargeVis/Linux/LargeVis.cpython-38-x86_64-linux-gnu.so
 /Code/externals/LargeVis/Windows/
 /Code/externals/LargeVis/annoy_index_file
+/Code/externals/pySRP/tests
+/Code/externals/pySRP/docs
+/Code/externals/pySRP/.travis.yml
 **annoy_index_file
+/Code/externals/pySRP/docs/
+/Code/externals/pySRP/tests/
+/Code/result.dat
+/Code/data.dat

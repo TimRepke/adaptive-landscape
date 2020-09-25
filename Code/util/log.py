@@ -44,6 +44,18 @@ def init_logging(level):
             },
             'matplotlib.font_manager': {
                 'level': 'ERROR'
+            },
+            'numba.core.byteflow': {
+                'level': 'ERROR'
+            },
+            'numba.core.ssa': {
+                'level': 'ERROR'
+            },
+            'numba.core.interpreter': {
+                'level': 'ERROR'
+            },
+            'matplotlib.text': {
+                'level': 'ERROR'
             }
         },
         'root': {
@@ -59,7 +71,7 @@ class ColouredFormatter(logging.Formatter):
         level = record.levelname
         colour = COLOURS[level]
         pad = (8 - len(level)) / 2
-        record.levelnamec = f'{colour}{" "*math.ceil(pad)}{level}{" "*math.floor(pad)}{SUFFIX}'
+        record.levelnamec = f'{colour}{" " * math.ceil(pad)}{level}{" " * math.floor(pad)}{SUFFIX}'
         return logging.Formatter.format(self, record)
 
 
@@ -68,7 +80,6 @@ def except2str(e, logger=None):
         tb = traceback.format_exc()
         logger.error(tb)
     return f'{type(e).__name__}: {e}'
-
 
 #             except Exception as err:
 #                 self._failed_urls.add(current_url)
