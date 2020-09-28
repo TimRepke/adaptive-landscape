@@ -9,6 +9,7 @@ from models.fitsne import FItSNEModel
 from models.bhtsne import BHtSNEModel
 from models.umap import UMAPModel
 from evaluation.displacement import calculate_displacement_score
+from evaluation.grid import test
 from data_handlers.plot import plot_grid
 import os
 from glob import glob
@@ -106,7 +107,8 @@ if RUN_EVAL:
         for mi, (model, _) in enumerate(MODEL_CONFIGS):
             logger.info(f'Running evaluations for {dataset_name} and {model} ({mi})...')
             eval_files = glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}*.tsv')
-            calculate_displacement_score(eval_files)
+            test(eval_files)
+            #calculate_displacement_score(eval_files)
 
 # digits = [i[0].reshape((-1,)) for i in m.get_data()][:1000]
 # labels = np.array([i[1] for i in m.get_data()][:1000])
