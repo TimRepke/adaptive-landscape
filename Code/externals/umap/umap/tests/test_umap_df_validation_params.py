@@ -5,7 +5,7 @@
 import numpy as np
 from nose.tools import assert_raises
 
-from umap.umap_ import DataFrameUMAP
+from externals.umap.umap.umap_ import DataFrameUMAP
 
 
 def test_dfumap_negative_op(nn_data):

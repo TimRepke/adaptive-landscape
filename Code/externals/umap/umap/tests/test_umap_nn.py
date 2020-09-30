@@ -6,14 +6,14 @@ from scipy import sparse
 from sklearn.neighbors import KDTree
 from sklearn.preprocessing import normalize
 
-from umap import distances as dist, sparse as spdist
-from umap.umap_ import (
+from externals.umap.umap import distances as dist, sparse as spdist
+from externals.umap.umap.umap_ import (
     INT32_MAX,
     INT32_MIN,
     nearest_neighbors,
     smooth_knn_dist,
 )
-from umap.utils import deheap_sort
+from externals.umap.umap.utils import deheap_sort
 
 
 # ===================================================

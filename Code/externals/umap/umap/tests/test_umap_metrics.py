@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal
-import umap.distances as dist
-import umap.sparse as spdist
+import externals.umap.umap.distances as dist
+import externals.umap.umap.sparse as spdist
 
 from sklearn.metrics import pairwise_distances
 from sklearn.neighbors import BallTree

@@ -1,7 +1,7 @@
 import numpy as np
 import numba
-import umap.distances as dist
-from umap.utils import tau_rand_int
+import externals.umap.umap.distances as dist
+from externals.umap.umap.utils import tau_rand_int
 
 
 @numba.njit()

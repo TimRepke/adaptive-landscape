@@ -1,7 +1,7 @@
 import numpy as np
 from nose.tools import assert_equal
 
-from umap import UMAP
+from externals.umap.umap import UMAP
 
 
 # ===================================================

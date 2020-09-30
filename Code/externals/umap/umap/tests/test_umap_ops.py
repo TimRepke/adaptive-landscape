@@ -9,7 +9,7 @@ from sklearn.metrics import adjusted_rand_score
 from sklearn.preprocessing import normalize
 from nose.tools import assert_equal, assert_less, assert_raises
 from numpy.testing import assert_array_equal
-from umap import UMAP
+from externals.umap.umap import UMAP
 import numpy as np
 
 # Transform isn't stable under batching; hard to opt out of this.

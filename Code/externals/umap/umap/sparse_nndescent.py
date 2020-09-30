@@ -8,9 +8,9 @@ import locale
 
 import numba
 import numpy as np
-import umap.sparse
+import externals.umap.umap.sparse as umap_sparse
 
-from umap.utils import (
+from externals.umap.umap.utils import (
     tau_rand,
     norm,
     make_heap,
@@ -22,7 +22,7 @@ from umap.utils import (
     deheap_sort,
 )
 
-from umap.rp_tree import search_sparse_flat_tree
+from externals.umap.umap.rp_tree import search_sparse_flat_tree
 
 locale.setlocale(locale.LC_NUMERIC, "C")
 
@@ -138,7 +138,7 @@ def sparse_nn_descent_internal_high_memory(
     rng_state,
     tried,
     max_candidates=50,
-    sparse_dist=umap.sparse.sparse_euclidean,
+    sparse_dist=umap_sparse.sparse_euclidean,
     n_iters=10,
     delta=0.001,
     rho=0.5,
@@ -209,7 +209,7 @@ def sparse_nn_descent(
     n_neighbors,
     rng_state,
     max_candidates=50,
-    sparse_dist=umap.sparse.sparse_euclidean,
+    sparse_dist=umap_sparse.sparse_euclidean,
     n_iters=10,
     delta=0.001,
     rho=0.5,

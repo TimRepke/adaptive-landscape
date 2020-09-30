@@ -5,7 +5,7 @@ import openTSNE
 import openTSNE.affinity
 import openTSNE.initialization
 import numpy as np
-from openTSNE.callbacks import VerifyExaggerationError
+from externals.openTSNE.openTSNE.callbacks import VerifyExaggerationError
 from sklearn import datasets
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split

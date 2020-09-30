@@ -8,11 +8,11 @@ from time import time
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from openTSNE import _tsne
-from openTSNE import initialization as initialization_scheme
-from openTSNE.affinity import Affinities, PerplexityBasedNN
-from openTSNE.quad_tree import QuadTree
-from openTSNE import utils
+from externals.openTSNE.openTSNE import _tsne
+from externals.openTSNE.openTSNE import initialization as initialization_scheme
+from externals.openTSNE.openTSNE.affinity import Affinities, PerplexityBasedNN
+from externals.openTSNE.openTSNE.quad_tree import QuadTree
+from externals.openTSNE.openTSNE import utils
 
 EPSILON = np.finfo(np.float64).eps
 

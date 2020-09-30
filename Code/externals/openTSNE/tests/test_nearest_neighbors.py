@@ -11,7 +11,7 @@ from numba import njit
 from numba.core.registry import CPUDispatcher
 from sklearn.utils import check_random_state
 
-from openTSNE import nearest_neighbors
+from externals.openTSNE.openTSNE import nearest_neighbors
 from .test_tsne import check_mock_called_with_kwargs
 
 

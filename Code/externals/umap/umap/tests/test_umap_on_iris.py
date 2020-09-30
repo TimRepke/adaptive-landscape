@@ -1,4 +1,4 @@
-from umap import UMAP
+from externals.umap.umap import UMAP
 from nose.tools import assert_greater_equal
 from scipy import sparse
 import numpy as np

@@ -39,8 +39,8 @@ import sklearn.neighbors
 
 from matplotlib.patches import Patch
 
-from umap.nndescent import initialise_search, initialized_nnd_search
-from umap.utils import deheap_sort, submatrix
+from externals.umap.umap.nndescent import initialise_search, initialized_nnd_search
+from externals.umap.umap.utils import deheap_sort, submatrix
 
 from bokeh.plotting import show as show_interactive
 from bokeh.layouts import column

@@ -1,6 +1,6 @@
 import numpy as np
 
-from openTSNE.tsne import TSNEEmbedding
+from externals.openTSNE.openTSNE.tsne import TSNEEmbedding
 
 
 def pBIC(embedding: TSNEEmbedding) -> float:

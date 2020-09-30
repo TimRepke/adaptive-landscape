@@ -1,4 +1,4 @@
-from openTSNE.quad_tree cimport QuadTree, Node
+from externals.openTSNE.openTSNE.quad_tree cimport QuadTree, Node
 import numpy as np
 
 

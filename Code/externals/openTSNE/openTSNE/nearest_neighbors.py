@@ -5,7 +5,7 @@ from scipy.spatial.distance import cdist
 from sklearn import neighbors
 from sklearn.utils import check_random_state
 
-from openTSNE import utils
+from externals.openTSNE.openTSNE import utils
 
 
 class KNNIndex:
@@ -189,7 +189,7 @@ class Annoy(KNNIndex):
         )
         timer.__enter__()
 
-        from openTSNE.dependencies.annoy import AnnoyIndex
+        from externals.openTSNE.openTSNE.dependencies.annoy import AnnoyIndex
 
         N = data.shape[0]
 

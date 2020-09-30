@@ -11,10 +11,10 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
 import openTSNE
-from openTSNE import affinity, initialization
-from openTSNE.affinity import PerplexityBasedNN
-from openTSNE.nearest_neighbors import NNDescent
-from openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
+from externals.openTSNE.openTSNE import affinity, initialization
+from externals.openTSNE.openTSNE.affinity import PerplexityBasedNN
+from externals.openTSNE.openTSNE.nearest_neighbors import NNDescent
+from externals.openTSNE.openTSNE.tsne import kl_divergence_bh, kl_divergence_fft
 
 np.random.seed(42)
 affinity.log.setLevel(logging.ERROR)

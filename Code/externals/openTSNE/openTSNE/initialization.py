@@ -3,7 +3,7 @@ import scipy.sparse as sp
 from sklearn.decomposition import PCA
 from sklearn.utils import check_random_state
 
-from openTSNE import utils
+from externals.openTSNE.openTSNE import utils
 
 
 def rescale(x, inplace=False):
