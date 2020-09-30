@@ -255,3 +255,11 @@ class UMAPModel(Model):
 
         Y = model.fit_transform(data)
         return Y
+
+
+
+class ParametricUMAPModel(Model):
+
+    @staticmethod
+    def fit_interval(data=None, input_file=None,):
+        pass
