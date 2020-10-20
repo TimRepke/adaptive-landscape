@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from externals.openTSNE.openTSNE import nearest_neighbors
-from externals.openTSNE.openTSNE import utils
+from openTSNE import nearest_neighbors
+from openTSNE import utils
 
 with utils.Timer("Loading data...", verbose=True):
     with gzip.open(path.join("data", "macosko_2015.pkl.gz"), "rb") as f:

@@ -52,7 +52,7 @@ def temporal(dataset: DataSet,
         target_size = target_size * num_items
 
     if label_dist is None:
-        label_dist = [{label: 1 / num_labels} for _ in intervals for label in dataset.data_labels]
+        label_dist = [{label: 1 / num_labels} for _ in intervals for label in range(len(dataset.data_labels))]
 
     data = []
     labels = []
@@ -79,8 +79,9 @@ def temporal(dataset: DataSet,
                                     for l, ld in label_distribution.items())
             default_dist = (1 - preliminary_total) / (num_labels - len(label_distribution))
             label_distribution = {label: default_dist if label not in label_distribution else label_distribution[label]
-                                  for label in dataset.data_labels}
+                                  for label in range(len(dataset.data_labels))}
         for label, distribution in label_distribution.items():
+            print(type(label), label)
             logger.debug(f'Interval {interval_num + 1}, label {label} (current idx: {current_idxs[label]}):')
             if type(distribution) is int:
                 interval_label_size_abs = distribution

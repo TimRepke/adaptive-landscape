@@ -6,9 +6,7 @@ from externals.bhtsne import bhtsne
 class BHtSNEModel(Model):
 
     @staticmethod
-    def fit_interval(data=None, input_file=None,
-                     no_dims=2, perplexity=50, theta=0.5, randseed=-1,
-                     verbose=False, initial_dims=50, use_pca=True, max_iter=1000):
+    def fit_data():
         """Run tSNE based on the Barnes-HT algorithm
 
         Parameters:

@@ -1,5 +1,6 @@
 from datasets.mnist import MNIST
 from datasets.fashion_mnist import FashionMNIST
+from datasets.newsgroups import Newsgroups
 
 import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
@@ -22,17 +23,23 @@ logger = logging.getLogger('main')
 TEMP_FOLDER = '../TempData'
 OUTPUT_FOLDER = '../OutputData'
 
-logger.info('> Loading MNIST datasets...')
+logger.info('> Loading datasets...')
 DATASETS = [
-    ('mnist', MNIST('../RawData/MNIST')),
+    ('20news', Newsgroups('../RawData/20news', f'{TEMP_FOLDER}/20news/parsed')),
+    # ('mnist', MNIST('../RawData/MNIST')),
     # ('fashion_mnist', FashionMNIST('../RawData/FashionMNIST'))
 ]
 
-LABEL_DIST = [{3: 0.001}, {3: 0.01}, {3: 0.1}]
+# LABEL_DIST = [{3: 0.001}, {3: 0.01}, {3: 0.1}]
 # LABEL_DIST = [{3: 0.001}, {3: 0.005}, {3: 0.01}, {3: 0.05}, {3: 0.1}]
+LABEL_DIST = [
+    {l: 100 if l != 1 else 1 for l in range(20) },
+    {1: 10},
+    {1: 40},
+    {1: 50}
+]
 SAMPLING_REF = SamplingReference.LABEL_COUNT
 TARGET_SIZE = 20000
-
 
 MODEL_CONFIGS = [
     (FItSNEModel, {'seed': 2020, 'df': 0.5}),
@@ -43,8 +50,8 @@ MODEL_CONFIGS = [
     (LargeVisModel, {}),
 ]
 
-RUN_MODELS = not True
-PLOT = not True
+RUN_MODELS = True
+PLOT = True
 RUN_EVAL = True
 
 if RUN_MODELS:
@@ -53,7 +60,8 @@ if RUN_MODELS:
         temporal_data, temporal_labels = temporal(dataset,
                                                   label_dist=LABEL_DIST,
                                                   target_size=TARGET_SIZE,
-                                                  sampling_reference=SAMPLING_REF)
+                                                  sampling_reference=SAMPLING_REF,
+                                                  auto_fill=False)
 
         for interval, (interval_data, interval_labels) in enumerate(
                 accumulate(temporal_data, temporal_labels, generate=True)):
@@ -72,7 +80,7 @@ if RUN_MODELS:
 
                 logger.info(f' - Run {model.__name__}...')
                 logger.info(f'   Settings: {config}')
-                y = model.fit_interval(data=data, input_file=temp_file, **config)
+                y = model.fit_data()
 
                 logger.info(' - Storing results...')
                 store_result(y, interval_labels, dataset_name, model.__name__ + str(mi), interval, OUTPUT_FOLDER)
@@ -84,7 +92,7 @@ if RUN_MODELS:
 if PLOT:
     for dataset_name, _ in DATASETS:
         for mi, (model, _) in enumerate(MODEL_CONFIGS):
-            eval_files = sorted(glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}*.tsv'))
+            eval_files = sorted(glob(f'{OUTPUT_FOLDER}/{dataset_name}/{model.__name__}{mi}*.tsv'))
             results = []
             labels = []
             for file in eval_files:
@@ -108,7 +116,7 @@ if RUN_EVAL:
             logger.info(f'Running evaluations for {dataset_name} and {model} ({mi})...')
             eval_files = glob(f'{OUTPUT_FOLDER}/{dataset_name}_{model.__name__}{mi}*.tsv')
             test(eval_files)
-            #calculate_displacement_score(eval_files)
+            # calculate_displacement_score(eval_files)
 
 # digits = [i[0].reshape((-1,)) for i in m.get_data()][:1000]
 # labels = np.array([i[1] for i in m.get_data()][:1000])

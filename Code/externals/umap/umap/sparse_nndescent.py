@@ -19,7 +19,7 @@ from externals.umap.umap.utils import (
     smallest_flagged,
     rejection_sample,
     new_build_candidates,
-    deheap_sort,
+    deheap_sort
 )
 
 from externals.umap.umap.rp_tree import search_sparse_flat_tree
@@ -69,7 +69,7 @@ def sparse_nn_descent_internal_low_memory(
     n_neighbors,
     rng_state,
     max_candidates=50,
-    sparse_dist=umap.sparse.sparse_euclidean,
+    sparse_dist=umap_sparse.sparse_euclidean,
     n_iters=10,
     delta=0.001,
     rho=0.5,

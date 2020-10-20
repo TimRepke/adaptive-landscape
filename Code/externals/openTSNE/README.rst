@@ -86,7 +86,7 @@ then, we'll import and run
 
 .. code:: python
 
-   from externals.openTSNE.openTSNE import TSNE
+   from openTSNE import TSNE
 
    embedding = TSNE().fit(x)
 

@@ -6,7 +6,7 @@ logger = logging.getLogger('disk')
 
 
 def store_result(vectors, labels, dataset, algorithm, interval, target_folder, parameters=None,
-                 base_template='${dataset}_${algorithm}_${interval}.tsv'):
+                 base_template='${dataset}/${algorithm}_${interval}.tsv'):
     if parameters is None:
         parameters = {}
     for parameter in parameters.keys():
@@ -15,6 +15,7 @@ def store_result(vectors, labels, dataset, algorithm, interval, target_folder, p
     parameters['algorithm'] = algorithm
     parameters['interval'] = interval
     file_name = os.path.join(target_folder, Template(base_template).substitute(parameters))
+    os.makedirs(os.path.dirname(file_name), exist_ok=True)
 
     logger.info(f'> Writing output to {file_name}...')
     with open(file_name, 'w') as out:

@@ -5,7 +5,7 @@ from scipy.spatial.distance import cdist
 from sklearn import neighbors
 from sklearn.utils import check_random_state
 
-from externals.openTSNE.openTSNE import utils
+from openTSNE import utils
 
 
 class KNNIndex:
@@ -189,7 +189,7 @@ class Annoy(KNNIndex):
         )
         timer.__enter__()
 
-        from externals.openTSNE.openTSNE.dependencies.annoy import AnnoyIndex
+        from openTSNE.dependencies.annoy import AnnoyIndex
 
         N = data.shape[0]
 
@@ -212,7 +212,7 @@ class Annoy(KNNIndex):
             self.index.add_item(i, data[i])
 
         # Number of trees. FIt-SNE uses 50 by default.
-        self.index.build(50)
+        self.index.build(50, n_jobs=self.n_jobs)
 
         # Return the nearest neighbors in the training set
         distances = np.zeros((N, k))
@@ -389,8 +389,6 @@ class NNDescent(KNNIndex):
             )
             n_jobs_pynndescent = 1
 
-        # UMAP uses the "alternative" algorithm, but that sometimes causes
-        # memory corruption, so use the standard one, which seems to work fine
         self.index = pynndescent.NNDescent(
             data,
             n_neighbors=n_neighbors_build,
@@ -399,7 +397,6 @@ class NNDescent(KNNIndex):
             random_state=self.random_state,
             n_trees=n_trees,
             n_iters=n_iters,
-            algorithm="standard",
             max_candidates=60,
             n_jobs=n_jobs_pynndescent,
         )

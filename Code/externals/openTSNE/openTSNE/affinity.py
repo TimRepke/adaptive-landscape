@@ -6,9 +6,9 @@ from functools import reduce
 import numpy as np
 import scipy.sparse as sp
 
-from externals.openTSNE.openTSNE import _tsne
-from externals.openTSNE.openTSNE import nearest_neighbors
-from externals.openTSNE.openTSNE import utils
+from openTSNE import _tsne
+from openTSNE import nearest_neighbors
+from openTSNE import utils
 
 log = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-# cython: boundscheck=False/Code/externals/openTSNE/
+# cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
 # cython: initializedcheck=False

@@ -3,7 +3,7 @@ import pickle
 from os import path
 
 import openTSNE
-from externals.openTSNE.openTSNE import utils
+from openTSNE import utils
 
 with utils.Timer("Loading data...", verbose=True):
     with gzip.open(path.join("data", "macosko_2015.pkl.gz"), "rb") as f:

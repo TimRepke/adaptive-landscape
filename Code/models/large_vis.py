@@ -41,8 +41,7 @@ class LargeVisModel(Model):
             [f.write('\t'.join([f'{di:.5f}' for di in d]) + '\n') for d in data]
 
     @staticmethod
-    def fit_interval(data=None, input_file=None, n_threads=-1, n_propagations=-1, alpha=-1, gamma=-1, perplexity=-1,
-                     n_trees=-1, n_negatives=-1, n_neighbours=-1):
+    def fit_data():
         if data is not None:
             data = np.array(data, dtype=np.float)
             LargeVis.loadarray(np.array(data))

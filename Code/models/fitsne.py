@@ -6,38 +6,7 @@ from externals.FItSNE.fast_tsne import fast_tsne
 class FItSNEModel(Model):
 
     @staticmethod
-    def fit_interval(data=None, input_file=None,
-                     theta=0.5,
-                     perplexity=30,
-                     map_dims=2,
-                     max_iter=750,
-                     stop_early_exag_iter=250,
-                     K=-1,
-                     sigma=-1,
-                     nbody_algo="FFT",
-                     knn_algo="annoy",
-                     mom_switch_iter=250,
-                     momentum=0.5,
-                     final_momentum=0.8,
-                     learning_rate="auto",
-                     early_exag_coeff=12,
-                     no_momentum_during_exag=False,
-                     n_trees=50,
-                     search_k=None,
-                     start_late_exag_iter="auto",
-                     late_exag_coeff=-1,
-                     nterms=3,
-                     intervals_per_integer=1,
-                     min_num_intervals=50,
-                     seed=-1,
-                     initialization="pca",
-                     load_affinities=None,
-                     perplexity_list=None,
-                     df=1,
-                     return_loss=False,
-                     nthreads=-1,
-                     max_step_norm=5,
-                     ):
+    def fit_data():
 
         """Run t-SNE. This implementation supports exact t-SNE, Barnes-Hut t-SNE
         and FFT-accelerated interpolation-based t-SNE (FIt-SNE). This is a Python

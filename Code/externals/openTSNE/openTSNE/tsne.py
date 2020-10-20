@@ -8,11 +8,11 @@ from time import time
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from externals.openTSNE.openTSNE import _tsne
-from externals.openTSNE.openTSNE import initialization as initialization_scheme
-from externals.openTSNE.openTSNE.affinity import Affinities, PerplexityBasedNN
-from externals.openTSNE.openTSNE.quad_tree import QuadTree
-from externals.openTSNE.openTSNE import utils
+from openTSNE import _tsne
+from openTSNE import initialization as initialization_scheme
+from openTSNE.affinity import Affinities, PerplexityBasedNN
+from openTSNE.quad_tree import QuadTree
+from openTSNE import utils
 
 EPSILON = np.finfo(np.float64).eps
 
@@ -1157,7 +1157,7 @@ class TSNE(BaseEstimator):
             )
         self.affinities = affinities
 
-        self.neighbors_method = neighbors
+        self.neighbors = neighbors
         self.negative_gradient_method = negative_gradient_method
 
         self.callbacks = callbacks
@@ -1165,6 +1165,18 @@ class TSNE(BaseEstimator):
 
         self.random_state = random_state
         self.verbose = verbose
+
+    @property
+    def neighbors_method(self):
+        import warnings
+
+        warnings.warn(
+            f"The `neighbors_method` attribute has been deprecated and will be "
+            f"removed in future versions. Please use the new `neighbors` "
+            f"attribute",
+            category=FutureWarning,
+        )
+        return self.neighbors
 
     def fit(self, X):
         """Fit a t-SNE embedding for a given data set.
@@ -1235,7 +1247,7 @@ class TSNE(BaseEstimator):
             affinities = PerplexityBasedNN(
                 X,
                 self.perplexity,
-                method=self.neighbors_method,
+                method=self.neighbors,
                 metric=self.metric,
                 metric_params=self.metric_params,
                 n_jobs=self.n_jobs,
