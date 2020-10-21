@@ -225,14 +225,12 @@ class UMAPParams:
 class UMAPModel(Model):
 
     @classmethod
-    def fit_data(cls, data=None, input_file=None, params: UMAPParams = None):
+    def fit_data(cls, data=None, params: UMAPParams = None):
         if params is None:
             params = UMAPParams()
 
         if data is not None:
             data = np.array(data, dtype=np.float)
-        elif input_file is not None:
-            raise AttributeError('not implemented')
         else:
             raise AssertionError('Needs either data or input_file parameter!')
 
@@ -240,10 +238,6 @@ class UMAPModel(Model):
 
         Y = model.fit_transform(data)
         return Y
-
-    @classmethod
-    def fit_intervals(cls, strategy: Callable, data: Iterable, params: UMAPParams):
-        strategy(data, params)
 
     @staticmethod
     def strategy_fix(data: Iterable, params: UMAPParams):
