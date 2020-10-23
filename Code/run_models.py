@@ -5,9 +5,11 @@ from datasets.newsgroups import Newsgroups
 import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
 from data_handlers.disk import ResultWriter
-from models.large_vis import LargeVisModel
+from models.large_vis import LargeVisModel, LargeVisParams
 from models.fitsne import FItSNEModel, FItSNEParams, FItSNEStrategyParams
 from models.bhtsne import BHtSNEModel
+from models.open_tsne import OpenTSNEModel, OpenTSNEParams
+from models.open_tsne import PerplexityParams, SigmaParams, UniformParams
 from models.umap import UMAPModel, UMAPParams
 from evaluation.displacement import calculate_displacement_score
 from evaluation.grid import test
@@ -32,11 +34,17 @@ DATASETS = [
 
 # LABEL_DIST = [{3: 0.001}, {3: 0.01}, {3: 0.1}]
 # LABEL_DIST = [{3: 0.001}, {3: 0.005}, {3: 0.01}, {3: 0.05}, {3: 0.1}]
+# LABEL_DIST = [
+#    {l: 800 if l != 1 else 1 for l in range(20)},
+#    {1: 100},
+#    {1: 300},
+#    {1: 600}
+# ]
 LABEL_DIST = [
-    {l: 100 if l != 1 else 1 for l in range(20)},
+    {l: 200 if l != 1 else 1 for l in range(20)},
     {1: 10},
-    {1: 40},
-    {1: 50}
+    {1: 50},
+    {1: 140}
 ]
 SAMPLING_REF = SamplingReference.LABEL_COUNT
 TARGET_SIZE = 20000
@@ -52,6 +60,12 @@ MODEL_CONFIGS = [
     (UMAPModel.strategy_fix, 'cos', UMAPParams(metric='cosine'), None),
     (UMAPModel.strategy_flex, 'cos', UMAPParams(metric='cosine'), None),
     (UMAPModel.strategy_semi_fix, 'cos', UMAPParams(metric='cosine'), None),
+    (OpenTSNEModel.strategy_static, 'pca', OpenTSNEParams(initialization='pca'), None),
+    (OpenTSNEModel.strategy_static, 'spec', OpenTSNEParams(initialization='spectral'), None),
+    (OpenTSNEModel.strategy_perplexity, 'defaults', OpenTSNEParams(initialization='spectral'), PerplexityParams()),
+    (OpenTSNEModel.strategy_sigma, 'defaults', OpenTSNEParams(), SigmaParams()),
+    (OpenTSNEModel.strategy_uniform, 'defaults', OpenTSNEParams(), UniformParams()),
+    (LargeVisModel.strategy_static, 'defaults', LargeVisParams(), None),
 ]
 
 if __name__ == '__main__':

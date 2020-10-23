@@ -22,7 +22,7 @@ class Model(ABC):
             for each interval.
         """
         for interval, (interval_data, interval_labels) in enumerate(data):
-            logger.info(f'> Running {cls.__class__} (static) for interval {interval} '
+            logger.info(f'> Running {cls.__name__} (static) for interval {interval} '
                         f'with {len(interval_data)} data points.')
             yield interval_labels, cls.fit_data(interval_data, params)
 

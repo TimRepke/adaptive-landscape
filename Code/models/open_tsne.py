@@ -2,11 +2,12 @@ import numpy as np
 from models import Model
 import enum
 
-from openTSNE import TSNE
-from openTSNE.affinity import Affinities
+from openTSNE import TSNE, TSNEEmbedding, PartialTSNEEmbedding
+from openTSNE.affinity import Affinities, PerplexityBasedNN, FixedSigmaNN, Uniform
 from openTSNE.callbacks import ErrorLogger
+from openTSNE import initialization
 from dataclasses import dataclass, asdict
-from typing import Union, Callable, Iterable, Optional, List
+from typing import Union, Callable, Iterable, Optional, List, Type, Literal
 from numpy.random import RandomState
 import logging
 
@@ -82,12 +83,13 @@ class OpenTSNEParams:
     # note that when passing in a precomputed positions, it is highly
     # recommended that the point positions have small variance
     # (std(Y) < 0.0001), otherwise you may get poor embeddings.
-    initialization: Union[np.ndarray, str] = "pca"
+    initialization: Union[np.ndarray, Literal['pca', 'spectral', 'random']] = "pca"
     # metric: Union[str, Callable]
     # The metric to be used to compute affinities between points in the
     # original space.
     # "cosine", "euclidean",  "manhattan", "hamming", "dot", "l1", "l2", "taxicab"
-    metric: Union[str, Callable] = "cosine"
+    metric: Union[Literal["cosine", "euclidean", "manhattan", "hamming", "dot", "l1", "l2", "taxicab"],
+                  Callable] = "cosine"
     # metric_params: dict
     # Additional keyword arguments for the metric function.
     metric_params: Optional[dict] = None
@@ -152,6 +154,67 @@ class OpenTSNEParams:
     verbose: bool = True
 
 
+@dataclass
+class AffinitiesParams:
+    data: np.ndarray = None
+    # method: str
+    # Specifies the nearest neighbor method to use. Can be ``exact``, ``annoy``,
+    # ``pynndescent``, ``approx``, or ``auto`` (default). ``approx`` uses Annoy
+    # if the input data matrix is not a sparse object and if Annoy supports
+    # the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
+    # nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
+    method: Literal['exact', 'annoy', 'pynndescent', 'approx', 'auto'] = "auto"
+    # metric: Union[str, Callable]
+    # The metric to be used to compute affinities between points in the
+    # original space.
+    metric: Union[Literal["cosine", "euclidean", "manhattan", "hamming", "dot", "l1", "l2", "taxicab"],
+                  Callable] = "euclidean"
+    # metric_params: dict
+    # Additional keyword arguments for the metric function.
+    metric_params: Optional[dict] = None
+    # symmetrize: bool
+    # Symmetrize affinity matrix. Standard t-SNE symmetrizes the interactions
+    # but when embedding new data, symmetrization is not performed.
+    symmetrize: bool = True
+    # n_jobs: int
+    # The number of threads to use while running t-SNE. This follows the
+    # scikit-learn convention, ``-1`` meaning all processors, ``-2`` meaning
+    # all but one, etc.
+    n_jobs: int = -2
+    # random_state: Union[int, RandomState]
+    # If the value is an int, random_state is the seed used by the random
+    # number generator. If the value is a RandomState instance, then it will
+    # be used as the random number generator. If the value is None, the random
+    # number generator is the RandomState instance used by `np.random`.
+    random_state: Union[int, RandomState] = None
+    # verbose: bool
+    verbose: bool = False
+
+
+@dataclass
+class PerplexityParams(AffinitiesParams):
+    # perplexity: float
+    # Perplexity can be thought of as the continuous :math:`k` number of
+    # nearest neighbors, for which t-SNE will attempt to preserve distances.
+    perplexity: float = 30
+
+
+@dataclass
+class SigmaParams(AffinitiesParams):
+    # sigma: float
+    # The bandwidth to use for the Gaussian kernels in the ambient space.
+    sigma: float = 1
+    # k: int
+    # The number of nearest neighbors to consider for each kernel.
+    k: int = 30
+
+
+@dataclass
+class UniformParams(AffinitiesParams):
+    # k_neighbors: int
+    k_neighbors: int = 30
+
+
 class OpenTSNEModel(Model):
     @classmethod
     def fit_data(cls, data=None, params: OpenTSNEParams = None):
@@ -166,15 +229,36 @@ class OpenTSNEModel(Model):
         return model.fit(data)
 
     @classmethod
-    def _strategy_affinity(cls, data: Iterable, params: OpenTSNEParams, affinity: Affinities, **affinity_kwargs):
-        affinity_model = affinity(**affinity_kwargs)
+    def _strategy_affinity(cls, data: Iterable, params: OpenTSNEParams, affinity: Type[Affinities],
+                           affinity_params: Union[PerplexityParams, SigmaParams, UniformParams]):
+        embedding: Union[TSNEEmbedding, PartialTSNEEmbedding]
+        prev_data = None
         for interval, (interval_data, interval_labels) in enumerate(data):
-            logger.info(f'> Running UMAP (semi_fix) for interval {interval} with {len(interval_data)} data points.')
+            logger.info(f'> Running OpenTSNE ({affinity.__name__}) for interval {interval} '
+                        f'with {len(interval_data)} data points.')
+            if interval == 0:
+                affinity_params.data = interval_data
+                params.affinities = affinity(**asdict(affinity_params))
+                embedding = TSNE(**asdict(params)).fit(interval_data)
+                ret = np.array(embedding)
+            else:
+                ret = embedding
+                embedding = embedding.transform(interval_data[len(prev_data):],
+                                                initialization='weighted',  # median or weighted
+                                                )
+                ret = np.vstack((ret, embedding))
 
-            if prev_hd is not None:
-                params.initialization = init_func(prev_2d, prev_hd, interval_data)
+            prev_data = interval_data
+            yield interval_labels, ret
 
-            prev_2d = fast_tsne(interval_data, **asdict(params))
-            prev_hd = interval_data
+    @classmethod
+    def strategy_perplexity(cls, data, params: OpenTSNEParams, strategy_params: PerplexityParams):
+        yield from cls._strategy_affinity(data, params, PerplexityBasedNN, strategy_params)
 
-            yield interval_labels, prev_2d
+    @classmethod
+    def strategy_sigma(cls, data, params: OpenTSNEParams, strategy_params: SigmaParams):
+        yield from cls._strategy_affinity(data, params, FixedSigmaNN, strategy_params)
+
+    @classmethod
+    def strategy_uniform(cls, data, params: OpenTSNEParams, strategy_params: UniformParams):
+        yield from cls._strategy_affinity(data, params, Uniform, strategy_params)

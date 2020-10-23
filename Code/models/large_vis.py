@@ -31,34 +31,48 @@
 import LargeVis
 import numpy as np
 from models import Model
+from dataclasses import dataclass, asdict
+import tempfile
+import logging
+import os
+
+logger = logging.getLogger('LargeVis')
+
+
+@dataclass
+class LargeVisParams:
+    output_dimension: int = 2
+    threads_number: int = -1
+    training_samples: int = -1
+    propagations_number: int = -1
+    learning_rate: float = -1
+    rp_trees_number: int = -1
+    negative_samples_number: int = -1
+    neighbors_number: int = -1
+    gamma: float = -1
+    perplexity: int = -1
 
 
 class LargeVisModel(Model):
+
     @staticmethod
-    def write_temp_file(file_name, data):
-        with open(file_name, 'w') as f:
+    def _write_temp_file(data):
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
             f.write(f'{len(data)}\t{len(data[0])}\n')
             [f.write('\t'.join([f'{di:.5f}' for di in d]) + '\n') for d in data]
+            return f.name
 
-    @staticmethod
-    def fit_data():
-        if data is not None:
-            data = np.array(data, dtype=np.float)
-            LargeVis.loadarray(np.array(data))
-        elif input_file is not None:
-            LargeVis.loadfile(input_file)
-        else:
-            raise AssertionError('Needs either data or input_file parameter!')
+    @classmethod
+    def fit_data(cls, data=None, params: LargeVisParams = None):
+        logger.info('Writing data temporarily to file...')
+        file_name = cls._write_temp_file(data)
+        LargeVis.loadfile(file_name)
+        logger.debug(f'Stored to {file_name}')
 
-        Y = LargeVis.run(2,  # output_dimension
-                         n_threads,  # threads_number
-                         -1,  # training_samples
-                         n_propagations,  # propagations_number
-                         alpha,  # learning_rate
-                         n_trees,  # rp_trees_number
-                         n_negatives,  # negative_samples_number
-                         n_neighbours,  # neighbors_number
-                         gamma,  # gamma
-                         perplexity  # perplexity
-                         )
-        return Y
+        logger.info('Running LargeVis...')
+        points = LargeVis.run(*asdict(params).values())
+
+        logger.debug('Removing temporary file again...')
+        os.remove(file_name)
+
+        return points

@@ -1,6 +1,7 @@
 import matplotlib.pylab as plt
 import seaborn as sns
 import matplotlib
+from matplotlib.lines import Line2D
 from typing import Tuple, Union
 from itertools import zip_longest
 import numpy as np
@@ -40,9 +41,8 @@ COLORS_39 = ["#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6",
              "#0AA6D8", "#013349", "#00846F"]
 
 
-def plot_grid(target_file, data, labels, desc, rows: int, cols: int,
-              possible_labels,
-              figsize: Tuple[Union[int, float], Union[int, float]], point_size=0.2,
+def plot_grid(target_file, data, labels, desc, rows: int, cols: int, possible_labels,
+              figsize: Tuple[Union[int, float], Union[int, float]], point_size=0.2, draw_legend=False,
               colours=None):
     if colours is None:
         colours = COLORS_16
@@ -74,4 +74,22 @@ def plot_grid(target_file, data, labels, desc, rows: int, cols: int,
                      ha='center', va='center')
 
     sns.despine(left=True, bottom=True)
+
+    if draw_legend:
+        legend_handles = [
+            Line2D(
+                [],
+                [],
+                marker="s",
+                color="w",
+                markerfacecolor=colours[li],
+                ms=10,
+                alpha=1,
+                linewidth=0,
+                label=l,
+                markeredgecolor="k",
+            )
+            for li, l in enumerate(possible_labels)
+        ]
+        plt.legend(handles=legend_handles, loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
     plt.savefig(target_file)
