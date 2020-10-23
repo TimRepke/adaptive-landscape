@@ -81,7 +81,6 @@ def temporal(dataset: DataSet,
             label_distribution = {label: default_dist if label not in label_distribution else label_distribution[label]
                                   for label in range(len(dataset.data_labels))}
         for label, distribution in label_distribution.items():
-            print(type(label), label)
             logger.debug(f'Interval {interval_num + 1}, label {label} (current idx: {current_idxs[label]}):')
             if type(distribution) is int:
                 interval_label_size_abs = distribution
@@ -108,16 +107,13 @@ def temporal(dataset: DataSet,
     return data, labels
 
 
-def accumulate(data, labels, generate=True):
+def accumulate(data, labels):
     accumulator_data = []
     accumulator_labels = []
-    ret = []
-    for interval_data, interval_labels in zip(data, labels):
+    for i, (interval_data, interval_labels) in enumerate(zip(data, labels)):
+        logger.debug(f'Adding {len(interval_labels)} labels and {len(interval_data)} items')
         accumulator_data += interval_data
         accumulator_labels += interval_labels
-        if generate:
-            yield accumulator_data, accumulator_labels
-        else:
-            ret.append((accumulator_data, accumulator_labels))
-    if not generate:
-        return ret
+        logger.debug(f'Interval {i} contains {len(accumulator_labels)} labels and {len(accumulator_data)} items')
+        yield np.array(accumulator_data), np.array(accumulator_labels)
+

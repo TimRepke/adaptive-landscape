@@ -9,11 +9,11 @@ import scipy.sparse as sp
 from openTSNE import _tsne
 from openTSNE import nearest_neighbors
 from openTSNE import utils
-
+from abc import ABC, abstractmethod
 log = logging.getLogger(__name__)
 
 
-class Affinities:
+class Affinities(ABC):
     """Compute the affinities between samples.
 
     t-SNE takes as input an affinity matrix :math:`P`, and does not really care
@@ -35,6 +35,7 @@ class Affinities:
         self.P = None
         self.verbose = verbose
 
+    @abstractmethod
     def to_new(self, data, return_distances=False):
         """Compute the affinities of new samples to the initial samples.
 

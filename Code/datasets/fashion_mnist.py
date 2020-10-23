@@ -20,6 +20,10 @@ from datasets import DataSet
 class FashionMNIST(DataSet):
     def __init__(self, raw_data_dir):
         super().__init__(raw_data_dir)
+        self.images = None
+        self.labels = None
+
+    def load(self):
         with gzip.open(f'{self.raw_data_dir}/train-labels-idx1-ubyte.gz', 'rb') as f:
             train_labels = np.frombuffer(f.read(), dtype=np.uint8, offset=8)
         with gzip.open(f'{self.raw_data_dir}/train-images-idx3-ubyte.gz', 'rb') as f:

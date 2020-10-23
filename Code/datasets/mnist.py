@@ -112,6 +112,11 @@ def parse_idx(fd):
 class MNIST(DataSet):
     def __init__(self, raw_data_dir, flatten=True):
         super().__init__(raw_data_dir)
+        self.flatten = flatten
+        self.images = None
+        self.labels = None
+
+    def load(self):
         with gzip.open(f'{self.raw_data_dir}/train-images-idx3-ubyte.gz', 'rb') as f:
             train_images = parse_idx(f)
         with gzip.open(f'{self.raw_data_dir}/train-labels-idx1-ubyte.gz', 'rb') as f:
@@ -122,7 +127,7 @@ class MNIST(DataSet):
             test_labels = parse_idx(f)
 
         self.images = np.vstack((train_images, test_images))
-        if flatten:
+        if self.flatten:
             self.images = self.images.reshape((self.images.shape[0], -1))
         self.labels = np.hstack((train_labels, test_labels)).astype(int)
 

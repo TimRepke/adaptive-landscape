@@ -38,7 +38,10 @@ class Newsgroups(DataSet):
         self.temp_dir = temp_dir
         os.makedirs(temp_dir, exist_ok=True)
         self.data_file = f'{self.temp_dir}/data.npy'
+        self.vecs = None
+        self.labels = None
 
+    def load(self):
         if os.path.isfile(self.data_file):
             with open(self.data_file, 'rb') as f:
                 self.labels = np.load(f)

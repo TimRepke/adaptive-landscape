@@ -7,6 +7,10 @@ class DataSet(ABC):
         self.raw_data_dir = raw_data_dir
 
     @abstractmethod
+    def load(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def __len__(self) -> int:
         raise NotImplementedError
 

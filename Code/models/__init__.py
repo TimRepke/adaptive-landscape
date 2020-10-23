@@ -17,7 +17,7 @@ class Model(ABC):
         pass
 
     @classmethod
-    def strategy_static(cls, data=None, params=None):
+    def strategy_static(cls, data=None, params=None, strategy_params=None):
         """"This strategy blindly calculates a fresh dim-red-embedding
             for each interval.
         """
@@ -27,11 +27,13 @@ class Model(ABC):
             yield interval_labels, cls.fit_data(interval_data, params)
 
     @classmethod
-    def fit_intervals(cls, strategy: Callable, data: Iterable, params):
-        strategy(data, params)
+    def fit_intervals(cls, strategy: Callable, data: Iterable, params, **kwargs):
+        strategy(data, params, **kwargs)
 
     @classmethod
     def get_neighbourhoods(cls, prev_hd, curr_hd, k=5):
+        logger.debug(f'Building neighbourhood index for k={k} with {prev_hd.shape} items '
+                     f'to look up {curr_hd.shape} items...')
         # Declaring index
         p = hnswlib.Index(space='l2', dim=prev_hd.shape[1])  # possible options are l2, cosine or ip
         # Initing index - the maximum number of elements should be known beforehand
@@ -45,18 +47,22 @@ class Model(ABC):
     @classmethod
     def get_init_mean_weighted(cls, prev_2d, prev_hd, curr_hd, k):
         neighbourhoods, distances = cls.get_neighbourhoods(prev_hd, curr_hd, k)
-        return np.array([np.average(prev_2d[neighbours], axis=0, weights=distances[i])
+        logger.debug('Calculating mean weighted points for next init...')
+        return np.array([np.average(prev_2d[neighbours], axis=0,
+                                    weights=(np.max(distances[i]) - distances[i]) + 0.000001)
                          for i, neighbours in enumerate(neighbourhoods)])
 
     @classmethod
     def get_init_mean(cls, prev_2d, prev_hd, curr_hd, k):
         neighbourhoods, distances = cls.get_neighbourhoods(prev_hd, curr_hd, k)
+        logger.debug('Calculating mean points for next init...')
         return np.array([np.average(prev_2d[neighbours], axis=0)
                          for i, neighbours in enumerate(neighbourhoods)])
 
     @classmethod
     def get_init_median(cls, prev_2d, prev_hd, curr_hd, k):
         neighbourhoods, _ = cls.get_neighbourhoods(prev_hd, curr_hd, k)
+        logger.debug('Calculating median points for next init...')
         return np.array([np.mean(prev_2d[neighbours], axis=0)
                          for neighbours in neighbourhoods])
 

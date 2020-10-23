@@ -239,8 +239,8 @@ class UMAPModel(Model):
         Y = model.fit_transform(data)
         return Y
 
-    @staticmethod
-    def strategy_fix(data: Iterable, params: UMAPParams):
+    @classmethod
+    def strategy_fix(cls, data: Iterable, params: UMAPParams, strategy_params):
         """"This strategy trains one embedding using the first interval
         and projects data using that for all following intervals.
         No continued training."
@@ -257,8 +257,8 @@ class UMAPModel(Model):
 
             yield interval_labels, umap.transform(interval_data)
 
-    @staticmethod
-    def strategy_semi_fix(data: Iterable, params: UMAPParams):
+    @classmethod
+    def strategy_semi_fix(cls, data: Iterable, params: UMAPParams, strategy_params):
         """"This strategy trains an embedding using the first interval
             and applies the fit function on data for all following intervals.
         """
@@ -270,8 +270,8 @@ class UMAPModel(Model):
 
             yield interval_labels, umap.transform(interval_data)
 
-    @staticmethod
-    def strategy_flex(data: Iterable, params: UMAPParams):
+    @classmethod
+    def strategy_flex(cls, data: Iterable, params: UMAPParams, strategy_params):
         """"This strategy trains an embedding every epoch and uses
             the previous layout as an init.
         """
