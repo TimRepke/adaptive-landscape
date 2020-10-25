@@ -62,9 +62,9 @@ MODEL_CONFIGS = [
     (UMAPModel.strategy_semi_fix, 'cos', UMAPParams(metric='cosine'), None),
     (OpenTSNEModel.strategy_static, 'pca', OpenTSNEParams(initialization='pca'), None),
     (OpenTSNEModel.strategy_static, 'spec', OpenTSNEParams(initialization='spectral'), None),
-    (OpenTSNEModel.strategy_perplexity, 'defaults', OpenTSNEParams(initialization='spectral'), PerplexityParams()),
-    (OpenTSNEModel.strategy_sigma, 'defaults', OpenTSNEParams(), SigmaParams()),
-    (OpenTSNEModel.strategy_uniform, 'defaults', OpenTSNEParams(), UniformParams()),
+    (OpenTSNEModel.strategy_perplexity, 'spec', OpenTSNEParams(initialization='spectral'), PerplexityParams(method='hnswlib')),
+    (OpenTSNEModel.strategy_sigma, 'defaults', OpenTSNEParams(), SigmaParams(method='hnswlib')),
+    (OpenTSNEModel.strategy_uniform, 'defaults', OpenTSNEParams(), UniformParams(method='hnswlib')),
     (LargeVisModel.strategy_static, 'defaults', LargeVisParams(), None),
 ]
 

@@ -24,6 +24,10 @@ for dataset_name, dataset in DATASETS:
     logger.info(f'> Preparing fake dynamic data for {dataset_name}...')
     for mi, (strategy, name, model_params, strategy_params) in enumerate(MODEL_CONFIGS):
         reader = IntervalResultReader(OUTPUT_FOLDER, dataset_name, strategy, name)
+        if len(reader.files) == 0:
+            logger.warning('No files seem to be here... Skip')
+            continue
+
         labels, points = reader.get_data()
         # '${dataset}/${model}/${strategy}_${name}_${interval}.tsv',
         output_file = f'{PLOTS_FOLDER}/{dataset_name}_{strategy.__self__.__name__}_{strategy.__name__}_{name}.pdf'

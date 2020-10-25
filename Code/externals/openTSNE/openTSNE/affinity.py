@@ -138,7 +138,6 @@ class PerplexityBasedNN(Affinities):
         self.knn_index, self.__neighbors, self.__distances = build_knn_index(
             data, method, k_neighbors, metric, metric_params, n_jobs, random_state, verbose
         )
-
         with utils.Timer("Calculating affinity matrix...", self.verbose):
             self.P = joint_probabilities_nn(
                 self.__neighbors,
@@ -299,6 +298,7 @@ def build_knn_index(
         "approx": preferred_approx_method,
         "annoy": nearest_neighbors.Annoy,
         "pynndescent": nearest_neighbors.NNDescent,
+        "hnswlib": nearest_neighbors.HNSW
     }
     if isinstance(method, nearest_neighbors.KNNIndex):
         knn_index = method
@@ -316,7 +316,6 @@ def build_knn_index(
             random_state=random_state,
             verbose=verbose,
         )
-
     neighbors, distances = knn_index.build(data, k=k)
 
     return knn_index, neighbors, distances

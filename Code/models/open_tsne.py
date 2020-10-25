@@ -8,8 +8,10 @@ from openTSNE.callbacks import ErrorLogger
 from openTSNE import initialization
 from dataclasses import dataclass, asdict
 from typing import Union, Callable, Iterable, Optional, List, Type, Literal
+import scipy.sparse
 from numpy.random import RandomState
 import logging
+
 
 logger = logging.getLogger('openTSNE')
 
@@ -163,12 +165,12 @@ class AffinitiesParams:
     # if the input data matrix is not a sparse object and if Annoy supports
     # the given metric. Otherwise it uses Pynndescent. ``auto`` uses exact
     # nearest neighbors for N<1000 and the same heuristic as ``approx`` for N>=1000.
-    method: Literal['exact', 'annoy', 'pynndescent', 'approx', 'auto'] = "auto"
+    method: Literal['exact', 'annoy', 'hnswlib', 'pynndescent', 'approx', 'auto'] = "auto"
     # metric: Union[str, Callable]
     # The metric to be used to compute affinities between points in the
     # original space.
     metric: Union[Literal["cosine", "euclidean", "manhattan", "hamming", "dot", "l1", "l2", "taxicab"],
-                  Callable] = "euclidean"
+                  Callable] = "cosine"
     # metric_params: dict
     # Additional keyword arguments for the metric function.
     metric_params: Optional[dict] = None
@@ -231,25 +233,63 @@ class OpenTSNEModel(Model):
     @classmethod
     def _strategy_affinity(cls, data: Iterable, params: OpenTSNEParams, affinity: Type[Affinities],
                            affinity_params: Union[PerplexityParams, SigmaParams, UniformParams]):
-        embedding: Union[TSNEEmbedding, PartialTSNEEmbedding]
+        embedding: TSNEEmbedding
+        affinities: Affinities
+
         prev_data = None
+
         for interval, (interval_data, interval_labels) in enumerate(data):
             logger.info(f'> Running OpenTSNE ({affinity.__name__}) for interval {interval} '
                         f'with {len(interval_data)} data points.')
             if interval == 0:
                 affinity_params.data = interval_data
-                params.affinities = affinity(**asdict(affinity_params))
-                embedding = TSNE(**asdict(params)).fit(interval_data)
-                ret = np.array(embedding)
+                affinities = affinity(**asdict(affinity_params))
+                if params.initialization == "pca":
+                    init = initialization.pca(
+                        interval_data,
+                        params.n_components,
+                        random_state=params.random_state,
+                        verbose=params.verbose,
+                    )
+                elif params.initialization == 'spectral':
+                    init = initialization.spectral(
+                        affinities.P,
+                        params.n_components,
+                        random_state=params.random_state,
+                        verbose=params.verbose,
+                    )
+                else:
+                    raise NotImplementedError('Init strategy no implemented.')
+
+                embedding = TSNEEmbedding(
+                    init, affinities,
+                    negative_gradient_method='fft',
+                    n_jobs=params.n_jobs
+                )
+                embedding.optimize(n_iter=params.early_exaggeration_iter, exaggeration=params.early_exaggeration,
+                                   momentum=params.initial_momentum, inplace=True)
+                embedding.optimize(n_iter=params.n_iter, exaggeration=params.exaggeration,
+                                   momentum=params.final_momentum, inplace=True)
             else:
-                ret = embedding
-                embedding = embedding.transform(interval_data[len(prev_data):],
-                                                initialization='weighted',  # median or weighted
-                                                )
-                ret = np.vstack((ret, embedding))
+                P, neighbours, distances = affinities.to_new(interval_data[len(prev_data):], return_distances=True)
+                init = initialization.weighted_mean(
+                    interval_data[len(prev_data):], embedding, neighbours, distances
+                )
+                init = initialization.rescale(np.vstack((embedding, init)))
+                affinity_params.data = interval_data
+                affinities = affinity(**asdict(affinity_params))
+
+                embedding = TSNEEmbedding(
+                    init, affinities,
+                    learning_rate=params.learning_rate,
+                    negative_gradient_method='fft',
+                    n_jobs=params.n_jobs
+                )
+                embedding.optimize(n_iter=params.n_iter, exaggeration=params.exaggeration,
+                                   momentum=params.final_momentum, inplace=True)
 
             prev_data = interval_data
-            yield interval_labels, ret
+            yield interval_labels, np.array(embedding)
 
     @classmethod
     def strategy_perplexity(cls, data, params: OpenTSNEParams, strategy_params: PerplexityParams):
