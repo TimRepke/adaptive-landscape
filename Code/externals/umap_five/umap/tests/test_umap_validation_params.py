@@ -5,7 +5,7 @@
 import warnings
 import numpy as np
 from nose.tools import assert_equal, assert_raises
-from umap import UMAP
+from externals.umap_five.umap import UMAP
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

@@ -24,8 +24,7 @@ for dataset_name, dataset in DATASETS:
     logger.info(f'> Preparing fake dynamic data for {dataset_name}...')
     for mi, (strategy, name, model_params, strategy_params) in enumerate(MODEL_CONFIGS):
         reader = IntervalResultReader(OUTPUT_FOLDER, dataset_name, strategy, name)
-        if len(reader.files) == 0:
-            logger.warning('No files seem to be here... Skip')
+        if not reader.check_exist():
             continue
 
         labels, points = reader.get_data()

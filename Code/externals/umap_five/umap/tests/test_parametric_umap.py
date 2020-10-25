@@ -1,7 +1,7 @@
 from sklearn.datasets import make_moons
 import numpy as np
 import tensorflow as tf
-from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
+from externals.umap_five.umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
 
 
 def test_create_model():

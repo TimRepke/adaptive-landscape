@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-import umap
+import externals.umap_five.umap as umap
 from unittest import mock
 
 np.random.seed(42)
@@ -14,7 +14,7 @@ def mapper(iris):
 def test_umap_plot_dependency():
     with mock.patch.dict("sys.modules", pandas=mock.MagicMock()):
         try:
-            from umap import plot
+            from externals.umap_five.umap import plot
         except:
             assert True
         else:
@@ -25,7 +25,7 @@ def test_umap_plot_dependency():
 # i.e. all the extra packages have been installed
 def test_umap_plot_testability():
     try:
-        from umap import plot
+        from externals.umap_five.umap import plot
 
         assert True
     except ImportError:
@@ -36,7 +36,7 @@ def test_umap_plot_testability():
 # needed as there is no assertion nor
 # property verification.
 def test_plot_runs_at_all(mapper, iris):
-    from umap import plot as umap_plot
+    from externals.umap_five.umap import plot as umap_plot
 
     umap_plot.points(mapper)
     umap_plot.points(mapper, labels=iris.target)

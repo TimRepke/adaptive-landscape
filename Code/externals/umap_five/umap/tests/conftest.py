@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 from scipy import sparse
 from sklearn.datasets import load_iris
-from umap import UMAP
+from externals.umap_five.umap import UMAP
 
 # Globals, used for all the tests
 np.random.seed(42)

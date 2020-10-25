@@ -61,7 +61,15 @@ class IntervalResultReader:
                 'model': strategy.__self__.__name__,
                 'strategy': strategy.__name__
             }
-        self.files = sorted(glob(os.path.join(self.target_folder, Template(self.base_template).substitute(self.info))))
+        self._glob_pattern = os.path.join(self.target_folder, Template(self.base_template).substitute(self.info))
+        self.files = sorted(glob(self._glob_pattern))
+
+    def check_exist(self):
+        if len(self.files) > 0:
+            logger.info(f'Found {len(self.files)} for pattern {self._glob_pattern}')
+            return True
+        logger.warning(f'Found {len(self.files)} for pattern {self._glob_pattern}')
+        return False
 
     def get_relevant_file_names(self):
         return self.files

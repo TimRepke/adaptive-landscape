@@ -233,8 +233,8 @@ class OpenTSNEModel(Model):
     @classmethod
     def _strategy_affinity(cls, data: Iterable, params: OpenTSNEParams, affinity: Type[Affinities],
                            affinity_params: Union[PerplexityParams, SigmaParams, UniformParams]):
-        embedding: TSNEEmbedding
-        affinities: Affinities
+        embedding: Optional[TSNEEmbedding] = None
+        affinities: Optional[Affinities] = None
 
         prev_data = None
 

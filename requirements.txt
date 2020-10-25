@@ -26,7 +26,7 @@ matplotlib==3.3.1
 msgpack==1.0.0
 multipledispatch==0.6.0
 numba==0.51.1
-numpy==1.19.1
+numpy~=1.19.1
 packaging==20.4
 pandas==1.1.1
 panel==0.9.7
@@ -58,8 +58,6 @@ urllib3==1.25.10
 Werkzeug==1.0.1
 xarray==0.16.0
 zict==2.0.0
-
-LargeVis~=1.0
 seaborn~=0.11.0
 setuptools~=50.0.0
 regex~=2020.7.14
@@ -71,4 +69,5 @@ torchvision~=0.7.0
 ipython~=7.18.1
 imageio~=2.9.0
 hnswlib~=0.4.0
-openTSNE~=0.4.4
+tensorflow~=2.3.1
+tensorboard~=2.3.0

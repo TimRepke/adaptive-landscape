@@ -1,4 +1,4 @@
-from umap import UMAP
+from externals.umap_five.umap import UMAP
 from sklearn.datasets import make_blobs
 from nose.tools import assert_greater_equal
 import numpy as np

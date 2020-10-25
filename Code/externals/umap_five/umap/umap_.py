@@ -27,11 +27,11 @@ from scipy.sparse import tril as sparse_tril, triu as sparse_triu
 import scipy.sparse.csgraph
 import numba
 
-import umap.distances as dist
+import externals.umap_five.umap.distances as dist
 
-import umap.sparse as sparse
+import externals.umap_five.umap.sparse as sparse
 
-from umap.utils import (
+from externals.umap_five.umap.utils import (
     tau_rand_int,
     deheap_sort,
     submatrix,
@@ -39,9 +39,9 @@ from umap.utils import (
     csr_unique,
     fast_knn_indices,
 )
-from umap.spectral import spectral_layout
-from umap.utils import deheap_sort, submatrix
-from umap.layouts import (
+from externals.umap_five.umap.spectral import spectral_layout
+from externals.umap_five.umap.utils import deheap_sort, submatrix
+from externals.umap_five.umap.layouts import (
     optimize_layout_euclidean,
     optimize_layout_generic,
     optimize_layout_inverse,
