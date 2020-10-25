@@ -22,6 +22,12 @@
 /Code/externals/umap/doc/
 /Code/externals/umap/ci_scripts/
 /Code/externals/umap/notebooks/
+/Code/externals/umap_five/.idea/
+/Code/externals/umap_five/examples/
+/Code/externals/umap_five/doc/
+/Code/externals/umap_five/ci_scripts/
+/Code/externals/umap_five/notebooks/
+/Code/externals/umap_five/images/
 /Code/externals/bhtsne/bh_tsne
 /Code/externals/LargeVis/Examples/
 /Code/externals/LargeVis/Linux/build/
