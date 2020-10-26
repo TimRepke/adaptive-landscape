@@ -5,6 +5,7 @@ from dataclasses import dataclass, asdict
 from typing import Union, Callable, Iterable, Optional
 from numpy.random import RandomState
 import logging
+import os
 
 logger = logging.getLogger('fitsne')
 
@@ -166,8 +167,14 @@ class FItSNEModel(Model):
             data = np.array(data, dtype=np.float)
         else:
             raise AssertionError('Needs either data or input_file parameter!')
+        points = fast_tsne(data, **asdict(params))
+        cls._cleanup()
+        return points
 
-        return fast_tsne(data, **asdict(params))
+    @staticmethod
+    def _cleanup():
+        os.remove('result.dat')
+        os.remove('data.dat')
 
     @classmethod
     def _strategy_flex(cls, init_func: Callable, data: Iterable, params: FItSNEParams,
@@ -192,6 +199,7 @@ class FItSNEModel(Model):
             prev_hd = interval_data
 
             yield interval_labels, prev_2d
+        cls._cleanup()
 
     @classmethod
     def strategy_flex_mean(cls, data: Iterable, params: FItSNEParams, strategy_params: FItSNEStrategyParams):

@@ -21,3 +21,12 @@ def calculate_displacement_score(base_files):
 
         logger.info(f'Total displacement: {displacement.mean():.7f}')
         prev = curr
+
+
+# TODO copy from thesne (loss function)
+def movement_penalty(Ys, N):
+    penalties = []
+    for t in range(len(Ys) - 1):
+        penalties.append(T.sum((Ys[t] - Ys[t + 1]) ** 2))
+
+    return T.sum(penalties) / (2 * N)

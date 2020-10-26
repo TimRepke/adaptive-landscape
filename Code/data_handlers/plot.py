@@ -43,6 +43,7 @@ COLORS_39 = ["#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6",
 
 def plot_grid(target_file, data, labels, desc, rows: int, cols: int, possible_labels,
               figsize: Tuple[Union[int, float], Union[int, float]], point_size=0.2, draw_legend=False,
+              draw_titles=False, draw_labels=True,
               colours=None):
     if colours is None:
         colours = COLORS_16
@@ -64,14 +65,17 @@ def plot_grid(target_file, data, labels, desc, rows: int, cols: int, possible_la
     for i, (data_, labels_, desc_) in enumerate(zip_longest(data, labels, desc)):
         plt.sca(ax[i])
         plt.scatter(data_[:, 0], data_[:, 1], s=point_size, c=[colours[int(li)] for li in labels_])
-        if desc_ is not None:
+
+        if draw_titles and desc_ is not None:
             plt.title(desc_)
+
         plt.gca().get_xaxis().set_visible(False)
         plt.gca().get_yaxis().set_visible(False)
 
-        for label in range(len(possible_labels)):
-            plt.text(np.mean(data_[labels_ == label, 0]), np.mean(data_[labels_ == label, 1]), label,
-                     ha='center', va='center')
+        if draw_labels:
+            for label in range(len(possible_labels)):
+                plt.text(np.mean(data_[labels_ == label, 0]), np.mean(data_[labels_ == label, 1]), label,
+                         ha='center', va='center')
 
     sns.despine(left=True, bottom=True)
 
@@ -92,4 +96,6 @@ def plot_grid(target_file, data, labels, desc, rows: int, cols: int, possible_la
             for li, l in enumerate(possible_labels)
         ]
         plt.legend(handles=legend_handles, loc='center left', bbox_to_anchor=(1, 0.5), frameon=False)
+
     plt.savefig(target_file)
+    plt.close()

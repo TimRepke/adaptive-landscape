@@ -56,6 +56,10 @@ class LargeVisParams:
 class LargeVisModel(Model):
 
     @staticmethod
+    def _cleanup():
+        os.remove('annoy_index_file')
+
+    @staticmethod
     def _write_temp_file(data):
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as f:
             f.write(f'{len(data)}\t{len(data[0])}\n')
@@ -72,7 +76,8 @@ class LargeVisModel(Model):
         logger.info('Running LargeVis...')
         points = LargeVis.run(*asdict(params).values())
 
-        logger.debug('Removing temporary file again...')
+        logger.debug('Removing temporary files again...')
         os.remove(file_name)
+        cls._cleanup()
 
         return points

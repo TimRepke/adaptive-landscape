@@ -12,6 +12,7 @@ from models.open_tsne import OpenTSNEModel, OpenTSNEParams
 from models.open_tsne import PerplexityParams, SigmaParams, UniformParams
 from models.umap import UMAPModel, UMAPParams
 from models.param_umap import ParametricUMAPModel, ParamUMAPParams
+from models.thesne import DynTSNEModel, DynTSNEParams
 from evaluation.displacement import calculate_displacement_score
 from evaluation.grid import test
 from data_handlers.plot import plot_grid
@@ -55,6 +56,7 @@ MODEL_CONFIGS = [
     (FItSNEModel.strategy_static, 'df1', FItSNEParams(seed=2020, df=1.), None),
     (FItSNEModel.strategy_static, 'df100', FItSNEParams(seed=2020, df=100.), None),
     (FItSNEModel.strategy_flex_mean, 'df1_k5', FItSNEParams(seed=2020, df=1.), FItSNEStrategyParams(k=5)),
+    (FItSNEModel.strategy_flex_mean, 'df05_k5', FItSNEParams(seed=2020, df=.5), FItSNEStrategyParams(k=5)),
     (FItSNEModel.strategy_flex_mean_weighted, 'df1_k5', FItSNEParams(seed=2020, df=1.), FItSNEStrategyParams(k=5)),
     (FItSNEModel.strategy_flex_median, 'df1_k5', FItSNEParams(seed=2020, df=1.), FItSNEStrategyParams(k=5)),
     (UMAPModel.strategy_static, 'cos', UMAPParams(metric='cosine'), None),
@@ -63,14 +65,19 @@ MODEL_CONFIGS = [
     (UMAPModel.strategy_semi_fix, 'cos', UMAPParams(metric='cosine'), None),
     (OpenTSNEModel.strategy_static, 'pca', OpenTSNEParams(initialization='pca'), None),
     (OpenTSNEModel.strategy_static, 'spec', OpenTSNEParams(initialization='spectral'), None),
-    (OpenTSNEModel.strategy_perplexity, 'spec', OpenTSNEParams(initialization='spectral'), PerplexityParams(method='hnswlib')),
+    (OpenTSNEModel.strategy_perplexity, 'spec', OpenTSNEParams(initialization='spectral'),
+     PerplexityParams(method='hnswlib')),
     (OpenTSNEModel.strategy_sigma, 'defaults', OpenTSNEParams(), SigmaParams(method='hnswlib')),
     (OpenTSNEModel.strategy_uniform, 'defaults', OpenTSNEParams(), UniformParams(method='hnswlib')),
     (LargeVisModel.strategy_static, 'defaults', LargeVisParams(), None),
     (ParametricUMAPModel.strategy_static, 'default', ParamUMAPParams(n_training_epochs=5), None),
     (ParametricUMAPModel.strategy_fix, 'default', ParamUMAPParams(n_training_epochs=5), None),
     (ParametricUMAPModel.strategy_semi_fix, 'default', ParamUMAPParams(n_training_epochs=5), None),
-    (ParametricUMAPModel.strategy_flex, 'default', ParamUMAPParams(n_training_epochs=5), None)
+    (ParametricUMAPModel.strategy_flex, 'default', ParamUMAPParams(n_training_epochs=5), None),
+    # (DynTSNEModel.strategy_native, 'default', DynTSNEParams(random_state=2020), None) # FIXME?
+    # TODO isomap
+    # TODO TopoAE
+    # TODO MLDL
 ]
 
 if __name__ == '__main__':

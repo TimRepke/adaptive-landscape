@@ -1,0 +1,2 @@
+# TODO see https://github.com/westlake-cairi/Markov-Lipschitz-Deep-Learning#2-ml-enc-performance-metrics-for-dimension-reduction-on-swiss-roll-800-points-data
+# https://arxiv.org/pdf/2006.08256.pdf page 6
