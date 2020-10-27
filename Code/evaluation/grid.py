@@ -2,11 +2,11 @@ import os
 import numpy as np
 from typing import List, Tuple
 import logging
-from evaluation import _read_file
+from evaluation import fit_gmms
 import matplotlib.pyplot as plt
 from collections import Counter, defaultdict
 
-logger = logging.getLogger('displacement')
+logger = logging.getLogger('grid')
 
 
 def _compute_grid_assignments(arr, grid_size):
@@ -103,22 +103,33 @@ def spread_purity_plot(base_files, threshold_spread: float = None, threshold_pur
     plt.show()
 
 
-def calculate_displacement_score(base_files):
-    base_files.sort()
-    prev = _read_file(base_files[0])
-    for file in base_files[1:]:
-        curr = _read_file(file)
-        logger.debug(f'Loaded file: {file}')
-        displacement = np.linalg.norm((prev[:, [0, 1]] / np.linalg.norm(prev[:, [0, 1]])) -
-                                      (curr[:len(prev), [0, 1]] / np.linalg.norm(curr[:, [0, 1]])), axis=1)
-        logger.info(f'Number of compared points: {displacement.shape[0]}')
-        logger.debug(displacement)
+def gaussian_overlap(interval_data, interval_labels):
+    ret = []
+    for interval, (data, labels) in enumerate(zip(interval_data, interval_labels)):
+        logger.info(f'Calculating gaussian overlaps of labels in {interval}..')
+        gmms = fit_gmms(data, labels)
 
-        logger.info(f'Displacement per digit: ' +
-                    str({digit: np.mean(displacement[prev[:, 2] == digit]) for digit in range(10)}))
+        ret.append({
+            i: np.average([
+                gmms[i][0].overlap(gmms[j][0]) * gmms[i][1].overlap(gmms[j][1])
+                for j in range(1, len(gmms)) if i != j
+            ])
+            for i in range(1, len(gmms))
+        })
+    return ret
 
-        logger.info(f'Total displacement: {displacement.mean():.7f}')
-        prev = curr
+
+def gaussian_spread(interval_data, interval_labels):
+    ret = []
+    for interval, (data, labels) in enumerate(zip(interval_data, interval_labels)):
+        logger.info(f'Calculating gaussian spread of labels in {interval}..')
+        gmms = fit_gmms(data, labels)
+
+        ret.append({
+            i: gmms[i][0].overlap(gmms[0][0]) * gmms[i][1].overlap(gmms[0][1])
+            for i in range(1, len(gmms))
+        })
+    return ret
 
 
 def test(base_files):

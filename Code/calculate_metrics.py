@@ -6,8 +6,8 @@ from datasets.newsgroups import Newsgroups
 import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
 from data_handlers.disk import ResultWriter, RawDataReaderNP, IntervalDataReader
-from evaluation.displacement import calculate_displacement_score
-from evaluation.grid import test
+from evaluation.displacement import calculate_displacement_score, gaussian_displacement
+from evaluation.grid import gaussian_overlap, gaussian_spread
 from data_handlers.plot import plot_grid, COLORS_39, COLORS_11
 import os
 from glob import glob
@@ -60,8 +60,12 @@ METRICS = [
     # 'iso.accuracy',
     # 'iso.nmi',
     # 'iso.l-kl',
-    'iso.trust',
-    'iso.cont'
+    # 'iso.trust',
+    # 'iso.cont',
+    'disp.score'
+    # 'disp.gauss'
+    # 'grid.gauss'
+    # 'grid.spread.gauss'
 ]
 
 for dataset_name, dataset in DATASETS:
@@ -74,6 +78,35 @@ for dataset_name, dataset in DATASETS:
         if not reader.check_exist():
             continue
         _, interval_points = reader.get_data()
+
+        if 'disp.score' in METRICS:
+            displacements = calculate_displacement_score(interval_points, interval_labels)
+            for interval, scores in enumerate(displacements):
+                logger.info(f'disp.score={np.average(list(scores.values()))}')
+                for label, value in scores.items():
+                    write_to_db(dataset_name, 'disp.score', value, strategy, name,
+                                space_='ld', interval_=interval + 1, label_=label)
+
+        if 'disp.gauss' in METRICS:
+            displacements = gaussian_displacement(interval_points, interval_labels)
+            for interval, scores in enumerate(displacements):
+                for label, value in scores.items():
+                    write_to_db(dataset_name, 'disp.gauss', value, strategy, name,
+                                space_='ld', interval_=interval + 1, label_=label)
+
+        if 'grid.gauss' in METRICS:
+            overlaps = gaussian_overlap(interval_points, interval_labels)
+            for interval, scores in enumerate(overlaps):
+                for label, value in scores.items():
+                    write_to_db(dataset_name, 'grid.gauss', value, strategy, name,
+                                space_='ld', interval_=interval, label_=label)
+
+        if 'grid.spread.gauss' in METRICS:
+            spread = gaussian_spread(interval_points, interval_labels)
+            for interval, scores in enumerate(spread):
+                for label, value in scores.items():
+                    write_to_db(dataset_name, 'grid.spread.gauss', value, strategy, name,
+                                space_='ld', interval_=interval, label_=label)
 
         for interval, (labels, data_hd, data_ld) in enumerate(zip(interval_labels, interval_data, interval_points)):
             logger.info(f'Calculating metrics for interval {interval} with {len(labels)} items...')
@@ -99,11 +132,11 @@ for dataset_name, dataset in DATASETS:
                 write_to_db(dataset_name, 'iso.l-kl', lkl, strategy, name, interval_=interval, info_='sigma=0.001')
 
             if 'iso.trust' in METRICS:
-                logger.info(f'Measure L-KL...')
+                logger.info(f'Measure Trust...')
                 trust = measurer.trustworthiness()
                 write_to_db(dataset_name, 'iso.trust', trust, strategy, name, interval_=interval)
 
             if 'iso.cont' in METRICS:
-                logger.info(f'Measure L-KL...')
+                logger.info(f'Measure Continuity...')
                 cont = measurer.continuity()
                 write_to_db(dataset_name, 'iso.cont', cont, strategy, name, interval_=interval)
