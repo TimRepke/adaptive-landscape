@@ -5,7 +5,7 @@ from datasets.newsgroups import Newsgroups
 
 import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
-from data_handlers.disk import ResultWriter, IntervalResultReader
+from data_handlers.disk import ResultWriter, IntervalDataReader
 from evaluation.displacement import calculate_displacement_score
 from evaluation.grid import test
 from data_handlers.plot import plot_grid, COLORS_39, COLORS_11
@@ -21,9 +21,9 @@ PLOTS_FOLDER = f'{OUTPUT_FOLDER}/plots'
 os.makedirs(PLOTS_FOLDER, exist_ok=True)
 
 for dataset_name, dataset in DATASETS:
-    logger.info(f'> Preparing fake dynamic data for {dataset_name}...')
+    logger.info(f'> Preparing plots for {dataset_name}...')
     for mi, (strategy, name, model_params, strategy_params) in enumerate(MODEL_CONFIGS):
-        reader = IntervalResultReader(OUTPUT_FOLDER, dataset_name, strategy, name)
+        reader = IntervalDataReader(OUTPUT_FOLDER, dataset_name, strategy, name)
         if not reader.check_exist():
             continue
 

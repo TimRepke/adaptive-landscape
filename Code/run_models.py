@@ -4,7 +4,7 @@ from datasets.newsgroups import Newsgroups
 
 import numpy as np
 from data_handlers.generators import temporal, SamplingReference, accumulate
-from data_handlers.disk import ResultWriter
+from data_handlers.disk import ResultWriter, RawDataWriter
 from models.large_vis import LargeVisModel, LargeVisParams
 from models.fitsne import FItSNEModel, FItSNEParams, FItSNEStrategyParams
 from models.bhtsne import BHtSNEModel
@@ -76,6 +76,7 @@ MODEL_CONFIGS = [
     (ParametricUMAPModel.strategy_flex, 'default', ParamUMAPParams(n_training_epochs=5), None),
     # (DynTSNEModel.strategy_native, 'default', DynTSNEParams(random_state=2020), None) # FIXME?
     # TODO isomap
+    # TODO PySRP
     # TODO TopoAE
     # TODO MLDL
 ]
@@ -90,6 +91,10 @@ if __name__ == '__main__':
                                                   sampling_reference=SAMPLING_REF,
                                                   auto_fill=False)
         intervals = list(accumulate(temporal_data, temporal_labels))
+        raw_data_writer = RawDataWriter(TEMP_FOLDER, dataset_name)
+        for interval, (interval_data, interval_labels) in enumerate(intervals):
+            raw_data_writer.store_result(interval, interval_labels, interval_data)
+
         for mi, (strategy, name, model_params, strategy_params) in enumerate(MODEL_CONFIGS):
             logger.info(f'> ({mi}/{len(MODEL_CONFIGS)}) Running {strategy.__self__.__name__} ({strategy.__name__}) '
                         f'for {len(intervals)} intervals...')
