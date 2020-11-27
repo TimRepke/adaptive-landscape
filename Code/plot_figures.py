@@ -11,6 +11,7 @@ from evaluation.grid import test
 from data_handlers.plot import plot_grid, COLORS_39, COLORS_11
 import os
 from glob import glob
+from typing import Literal
 import logging
 from util.log import init_logging
 
@@ -19,6 +20,8 @@ logger = logging.getLogger('plot')
 
 PLOTS_FOLDER = f'{OUTPUT_FOLDER}/plots'
 os.makedirs(PLOTS_FOLDER, exist_ok=True)
+
+FILE_FORMAT: Literal['pdf', 'svg'] = 'svg'
 
 for dataset_name, dataset in DATASETS:
     logger.info(f'> Preparing plots for {dataset_name}...')
@@ -29,7 +32,9 @@ for dataset_name, dataset in DATASETS:
 
         labels, points = reader.get_data()
         # '${dataset}/${model}/${strategy}_${name}_${interval}.tsv',
-        output_file = f'{PLOTS_FOLDER}/{dataset_name}_{strategy.__self__.__name__}_{strategy.__name__}_{name}.pdf'
+        output_file = f'{PLOTS_FOLDER}/{FILE_FORMAT.upper()}s/{dataset_name}_{strategy.__self__.__name__}_' \
+                      f'{strategy.__name__}_{name}.{FILE_FORMAT}'
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
         logger.info(f'Plotting results to {output_file}')
 
