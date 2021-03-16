@@ -45,7 +45,7 @@ for dataset_name, dataset in DATASETS:
                                               label_dist=LABEL_DIST,
                                               target_size=TARGET_SIZE,
                                               sampling_reference=SAMPLING_REF)
-    intervals = accumulate(temporal_data, temporal_labels, generate=False)
+    intervals = accumulate(temporal_data, temporal_labels)
 
     Ys_fix = UMAPModel.fit_intervals(UMAPModel.strategy_fix, intervals, umap_settings)
     labs = [np.array([int(i) for i in d[0]]) for d in Ys_fix]
